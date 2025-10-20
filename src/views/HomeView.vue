@@ -1,9 +1,7 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import SetTracker from '../components/SetTracker.vue';
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <SetTracker />
 </template>
