@@ -1,6 +1,6 @@
 <template>
-  <v-card class="pa-6" elevation="2">
-    <h2 class="text-h6 mb-4">Body Metrics</h2>
+  <v-card class="pa-6">
+    <!-- <h2 class="text-h6 mb-4">Body Metrics</h2>
     <v-row class="mb-2">
       <v-col cols="12" sm="4">
         <v-text-field
@@ -15,7 +15,7 @@
       </v-col>
     </v-row>
 
-    <v-divider class="my-4" />
+    <v-divider class="my-4" /> -->
 
     <v-row class="align-center">
       <v-col>
@@ -24,9 +24,8 @@
           hide-header
           v-model="weightInput.date"
         >
-          <!-- decorate days that are in loggedDates -->
-          <template #day="{ date, props }">
-            <v-badge v-if="isLogged(date)" dot color="primary">
+          <template #day="{ item, props }">
+            <v-badge v-if="isLogged(item.date)" dot color="green">
               <v-btn v-bind="props" />
             </v-badge>
             <v-btn v-else v-bind="props" />
@@ -39,14 +38,16 @@
       <v-col cols="12" sm="4">
         <v-text-field
           v-model.number="weightInput.weight"
-          :label="'Add your weight for ' + toYMD(weightInput.date) + ' (kg)'"
+          :label="'Enter weight for: ' + toYMD(weightInput.date) + ' (kg)'"
           type="number"
           min="0"
+          step="0.1"
         />
       </v-col>
-      <v-col cols="12" sm="4" class="d-flex align-end">
-        <v-btn color="primary" @click="addWeight">Add</v-btn>
-      </v-col>
+    </v-row>
+
+    <v-row class="align-center mb-2">
+      <v-btn color="primary" @click="addWeight">Add</v-btn>
     </v-row>
 
     <v-list density="compact" lines="two" v-if="weights.length">
@@ -60,17 +61,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const height = ref(null);
 const age = ref(null);
+
 const weights = ref([]);
 
 const today = new Date().toISOString().slice(0, 10);
 const weightInput = ref({ date: today, weight: null });
 
+const loggedDates = computed(() => new Set(weights.value.map((w) => w.date)));
+
+function isLogged(dateStr) {
+  const key =
+    typeof dateStr === 'string' ? dateStr.slice(0, 10) : toYMD(dateStr);
+  return loggedDates.value.has(key);
+}
+
 function toYMD(val) {
-  // accepts 'YYYY-MM-DD' or Date and returns 'YYYY-MM-DD'
   if (!val) return '';
   if (typeof val === 'string') return val.slice(0, 10);
   const d = new Date(val);
@@ -86,7 +95,15 @@ function addWeight() {
 
   if (!date || !Number.isFinite(weight)) return;
 
-  weights.value.unshift({ date, weight });
-  weightInput.value = { date: '', weight: null };
+  // optional: round to 1 decimals
+  const entry = { date, weight: Number(weight.toFixed(1)) };
+
+  // optional: upsert by date to avoid duplicates
+  const idx = weights.value.findIndex((x) => x.date === date);
+  if (idx >= 0) weights.value.splice(idx, 1, entry);
+  else weights.value.unshift(entry);
+
+  // keep current date selected, clear weight
+  weightInput.value = { date, weight: null };
 }
 </script>
