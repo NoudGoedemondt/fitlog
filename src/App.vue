@@ -1,6 +1,8 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
+import Button from 'primevue/button'
+import InputText from 'primevue/inputtext'
 </script>
 
 <template>
@@ -13,7 +15,10 @@ import HelloWorld from './components/HelloWorld.vue'
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
+        <Button label="This is a PrimeVue Button" />
       </nav>
+
+      <InputText placeholder="PrimeVue InputText..." />
     </div>
   </header>
 
