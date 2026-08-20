@@ -3,6 +3,14 @@ import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
+import { onMounted } from 'vue'
+import { supabase } from './supabase/supabase.js'
+
+onMounted(async () => {
+  const { data, error } = await supabase.from('exercises').select('*')
+  console.log('Mounted!')
+  console.log(data, error)
+})
 </script>
 
 <template>
