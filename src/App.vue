@@ -1,36 +1,43 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
 import { onMounted } from 'vue'
-import { supabase } from './supabase/supabase.js'
+import { supabase } from './plugins/supabase.js'
+import { ref } from 'vue'
 
 onMounted(async () => {
   const { data, error } = await supabase.from('exercises').select('*')
   console.log('Mounted!')
   console.log(data, error)
 })
+
+const showHelloWorld = ref(false)
+
+const toggleHelloWorld = () => {
+  showHelloWorld.value = !showHelloWorld.value
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <v-app>
+    <header>
+      <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <div class="wrapper">
+        <v-btn color="primary" @click="toggleHelloWorld" prepend-icon="mdi-check"
+          >Hello Vuetify</v-btn
+        >
+        <HelloWorld msg="You did it!" v-if="showHelloWorld" />
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-        <Button label="This is a PrimeVue Button" />
-      </nav>
+        <nav>
+          <RouterLink to="/">Home</RouterLink>
+          <RouterLink to="/about">About</RouterLink>
+        </nav>
+      </div>
+    </header>
 
-      <InputText placeholder="PrimeVue InputText..." />
-    </div>
-  </header>
-
-  <RouterView />
+    <RouterView />
+  </v-app>
 </template>
 
 <style scoped>
