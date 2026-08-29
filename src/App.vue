@@ -3,10 +3,50 @@ import { RouterView } from 'vue-router'
 import { onMounted } from 'vue'
 import { supabase } from './plugins/supabase.js'
 
-onMounted(async () => {
-  const { data, error } = await supabase.from('exercises').select('*')
-  console.log('Mounted!')
-  console.log(data, error)
+const registerUser = async () => {
+  const { data, error } = await supabase.auth.signUp({
+    email: 'noudgoedemondt@gmail.com',
+    password: 'noud123',
+    options: {
+      data: {
+        username: 'noud',
+      },
+    },
+  })
+
+  console.log('registerUser', data, error)
+  return { data, error }
+}
+
+const loginuser = async () => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: 'noudgoedemondt@gmail.com',
+    password: 'noud123',
+  })
+
+  console.log('loginuser', data, error)
+  return { data, error }
+}
+
+const logoutUser = async () => {
+  const { error } = await supabase.auth.signOut()
+
+  console.log('logoutUser', error)
+  return { error }
+}
+
+const getUser = async () => {
+  const { data, error } = await supabase.auth.getUser()
+
+  console.log('getUser', data, error)
+  return { data, error }
+}
+
+onMounted(() => {
+  window.registerUser = registerUser
+  window.loginUser = loginuser
+  window.logoutUser = logoutUser
+  window.getUser = getUser
 })
 </script>
 
