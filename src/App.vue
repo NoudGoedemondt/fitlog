@@ -18,13 +18,13 @@ const registerUser = async () => {
   return { data, error }
 }
 
-const loginuser = async () => {
+const loginUser = async () => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email: 'noudgoedemondt@gmail.com',
     password: 'noud123',
   })
 
-  console.log('loginuser', data, error)
+  console.log('loginUser', data, error)
   return { data, error }
 }
 
@@ -44,7 +44,7 @@ const getUser = async () => {
 
 onMounted(() => {
   window.registerUser = registerUser
-  window.loginUser = loginuser
+  window.loginUser = loginUser
   window.logoutUser = logoutUser
   window.getUser = getUser
 })
