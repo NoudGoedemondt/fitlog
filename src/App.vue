@@ -2,6 +2,9 @@
 import { RouterView } from 'vue-router'
 import { onMounted } from 'vue'
 import { supabase } from './plugins/supabase.js'
+import { useAuthStore } from './stores/auth.js'
+
+const authStore = useAuthStore()
 
 const registerUser = async () => {
   const { data, error } = await supabase.auth.signUp({
@@ -42,7 +45,9 @@ const getUser = async () => {
   return { data, error }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await authStore.init()
+
   window.registerUser = registerUser
   window.loginUser = loginUser
   window.logoutUser = logoutUser
