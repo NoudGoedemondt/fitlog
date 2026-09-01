@@ -2,6 +2,7 @@
 import { supabase } from '../plugins/supabase.js'
 import router from '../router/index.js'
 import { ref } from 'vue'
+import { emailRules, passwordRules } from '../utils/validationRules.js'
 
 const userEmail = ref('')
 const userPassword = ref('')
@@ -9,12 +10,6 @@ const errorMessage = ref('')
 const isLoading = ref(false)
 
 const loginForm = ref(null)
-
-const emailRules = [
-  (v) => !!v || 'E-mail is required.',
-  (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid.',
-]
-const passwordRules = [(v) => !!v || 'Password is required.']
 
 const loginUser = async () => {
   const { valid } = await loginForm.value.validate()
