@@ -42,80 +42,84 @@ const registerUser = async () => {
 
 <template>
   <v-container>
-    <v-row justify="center">
-      <v-col cols="12" sm="6" md="8" lg="4">
-        <v-img
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.svg"
-          alt="Vuetify Logo"
-          width="50"
-          class="mx-auto mb-4"
-        />
-        <v-card-title class="text-h5 text-center font-weight-bold mb-6 text-medium-emphasis">
-          Create your account
-        </v-card-title>
-        <v-card class="elevation-12 pa-4 py-8" :loading="isLoading">
-          <v-card-text>
-            <v-form ref="registerForm" @submit.prevent="registerUser">
-              <v-text-field
-                v-model="userName"
-                :rules="[required, minLength(4)]"
-                label="Username"
-                prepend-inner-icon="mdi-account-outline"
-                type="text"
-                variant="outlined"
-                density="comfortable"
-                class="mb-2"
-              ></v-text-field>
-              <v-text-field
-                v-model="userEmail1"
-                :rules="[required, isEmail]"
-                label="Email"
-                prepend-inner-icon="mdi-email-outline"
-                type="email"
-                variant="outlined"
-                density="comfortable"
-                class="mb-2"
-              ></v-text-field>
-              <v-text-field
-                v-model="userEmail2"
-                :rules="[required, isEmail, matchOther(userEmail1, 'Emails')]"
-                label="Confirm Email"
-                prepend-inner-icon="mdi-email-outline"
-                type="email"
-                variant="outlined"
-                density="comfortable"
-                class="mb-2"
-              ></v-text-field>
-              <v-text-field
-                v-model="userPassword1"
-                :rules="[required, minLength(6)]"
-                label="Password"
-                prepend-inner-icon="mdi-lock-outline"
-                type="password"
-                variant="outlined"
-                density="comfortable"
-                class="mb-2"
-              ></v-text-field>
-              <v-text-field
-                v-model="userPassword2"
-                :rules="[required, minLength(6), matchOther(userPassword1, 'Passwords')]"
-                label="Confirm Password"
-                prepend-inner-icon="mdi-lock-outline"
-                type="password"
-                variant="outlined"
-                density="comfortable"
-                class="mb-2"
-              ></v-text-field>
-              <v-alert v-if="errorMessage" variant="outlined" type="error" class="mb-8">
-                {{ errorMessage }}
-              </v-alert>
-              <v-btn block color="primary" size="large" type="submit" class="mt-4">
-                Register
-              </v-btn>
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+    <div class="form-container">
+      <v-img
+        src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.svg"
+        alt="Vuetify Logo"
+        width="50"
+        class="mx-auto mb-4"
+      />
+      <v-card-title class="text-h5 text-center font-weight-bold mb-6 text-medium-emphasis">
+        Create your account
+      </v-card-title>
+      <v-card class="elevation-12 pa-4 py-8" :loading="isLoading">
+        <v-card-text>
+          <v-form ref="registerForm" @submit.prevent="registerUser">
+            <v-text-field
+              v-model="userName"
+              :rules="[required, minLength(4)]"
+              label="Username"
+              prepend-inner-icon="mdi-account-outline"
+              type="text"
+              variant="outlined"
+              density="comfortable"
+              class="mb-2"
+            ></v-text-field>
+            <v-text-field
+              v-model="userEmail1"
+              :rules="[required, isEmail]"
+              label="Email"
+              prepend-inner-icon="mdi-email-outline"
+              type="email"
+              variant="outlined"
+              density="comfortable"
+              class="mb-2"
+            ></v-text-field>
+            <v-text-field
+              v-model="userEmail2"
+              :rules="[required, isEmail, matchOther(userEmail1, 'Emails')]"
+              label="Confirm Email"
+              prepend-inner-icon="mdi-email-outline"
+              type="email"
+              variant="outlined"
+              density="comfortable"
+              class="mb-2"
+            ></v-text-field>
+            <v-text-field
+              v-model="userPassword1"
+              :rules="[required, minLength(6)]"
+              label="Password"
+              prepend-inner-icon="mdi-lock-outline"
+              type="password"
+              variant="outlined"
+              density="comfortable"
+              class="mb-2"
+            ></v-text-field>
+            <v-text-field
+              v-model="userPassword2"
+              :rules="[required, minLength(6), matchOther(userPassword1, 'Passwords')]"
+              label="Confirm Password"
+              prepend-inner-icon="mdi-lock-outline"
+              type="password"
+              variant="outlined"
+              density="comfortable"
+              class="mb-2"
+            ></v-text-field>
+            <v-alert v-if="errorMessage" variant="outlined" type="error" class="mb-8">
+              {{ errorMessage }}
+            </v-alert>
+            <v-btn block color="primary" size="large" type="submit" class="mt-4"> Register </v-btn>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </div>
   </v-container>
 </template>
+
+<style scoped>
+.form-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+</style>
