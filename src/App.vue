@@ -21,7 +21,11 @@ onMounted(async () => {
 <template>
   <v-app>
     <v-app-bar color="primary">
+      <v-spacer></v-spacer>
+
       <v-toolbar-title>FitLog</v-toolbar-title>
+
+      <v-spacer></v-spacer>
 
       <v-btn variant="text" to="/">Home</v-btn>
       <v-btn variant="text" to="/workouts">Workouts</v-btn>
@@ -40,6 +44,8 @@ onMounted(async () => {
           <v-list-item @click="handleLogout">Log Out</v-list-item>
         </v-list>
       </v-menu>
+
+      <v-spacer></v-spacer>
     </v-app-bar>
 
     <v-main>
