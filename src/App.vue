@@ -6,52 +6,15 @@ import { useAuthStore } from './stores/auth.js'
 
 const authStore = useAuthStore()
 
-const registerUser = async () => {
-  const { data, error } = await supabase.auth.signUp({
-    email: 'noudgoedemondt@gmail.com',
-    password: 'noud123',
-    options: {
-      data: {
-        username: 'noud',
-      },
-    },
-  })
-
-  console.log('registerUser', data, error)
-  return { data, error }
-}
-
-const loginUser = async () => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: 'noudgoedemondt@gmail.com',
-    password: 'noud123',
-  })
-
-  console.log('loginUser', data, error)
-  return { data, error }
-}
-
-const logoutUser = async () => {
+const handleLogout = async () => {
   const { error } = await supabase.auth.signOut()
-
-  console.log('logoutUser', error)
-  return { error }
-}
-
-const getUser = async () => {
-  const { data, error } = await supabase.auth.getUser()
-
-  console.log('getUser', data, error)
-  return { data, error }
+  if (error) {
+    console.error('Error logging out:', error)
+  }
 }
 
 onMounted(async () => {
   await authStore.init()
-
-  window.registerUser = registerUser
-  window.loginUser = loginUser
-  window.logoutUser = logoutUser
-  window.getUser = getUser
 })
 </script>
 
@@ -66,6 +29,17 @@ onMounted(async () => {
       <v-btn variant="text" to="/meals">Meals</v-btn>
       <v-btn variant="text" to="/weight-logs">Weight Logs</v-btn>
       <v-btn variant="text" to="/body-profile">Body Profile</v-btn>
+
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-btn v-bind="props">
+            {{ authStore.user?.user_metadata?.username }}
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="handleLogout">Log Out</v-list-item>
+        </v-list>
+      </v-menu>
     </v-app-bar>
 
     <v-main>
