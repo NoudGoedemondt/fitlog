@@ -2,6 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import { watch } from 'vue'
 
+/**
+ * Waits for authStore's initial session check to finish.
+ * `isLoading` starts true until App.vue's onMounted calls
+ * authStore.init() — without this, the guard below could see
+ * `user === null` before we actually know if they're logged in.
+ * Resolves immediately if the check already finished.
+ */
 function waitForAuthReady(authStore) {
   return new Promise((resolve) => {
     if (!authStore.isLoading) {
