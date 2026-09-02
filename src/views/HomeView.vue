@@ -57,7 +57,7 @@ const features = [
         <div class="d-flex flex-wrap align-center gap-4">
           <transition name="slide-fade">
             <v-btn
-              v-if="!authStore.user"
+              v-if="!authStore.isLoading && !authStore.user"
               color="primary"
               size="large"
               elevation="2"
@@ -69,7 +69,7 @@ const features = [
           </transition>
           <transition name="slide-fade">
             <v-btn
-              v-if="!authStore.user"
+              v-if="!authStore.isLoading && !authStore.user"
               variant="outlined"
               color="secondary"
               size="large"
