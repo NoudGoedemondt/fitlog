@@ -1,8 +1,10 @@
 <script setup>
 import { supabase } from '../plugins/supabase.js'
-import router from '../router/index.js'
+import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { required, isEmail, matchOther, minLength } from '../utils/validationRules.js'
+
+const router = useRouter()
 
 const userName = ref('')
 const userEmail1 = ref('')
@@ -32,6 +34,7 @@ const registerUser = async () => {
   })
 
   isLoading.value = false
+
   if (error) {
     errorMessage.value = error.message
   } else {

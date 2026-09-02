@@ -1,8 +1,10 @@
 <script setup>
 import { supabase } from '../plugins/supabase.js'
-import router from '../router/index.js'
+import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { required, isEmail } from '../utils/validationRules.js'
+
+const router = useRouter()
 
 const userEmail = ref('')
 const userPassword = ref('')
@@ -17,6 +19,7 @@ const loginUser = async () => {
 
   isLoading.value = true
   errorMessage.value = ''
+
   const { error } = await supabase.auth.signInWithPassword({
     email: userEmail.value,
     password: userPassword.value,
