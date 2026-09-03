@@ -29,39 +29,57 @@ onMounted(async () => {
 <template>
   <v-app>
     <v-app-bar color="primary">
-      <v-spacer></v-spacer>
+      <div class="app-bar-inner">
+        <div class="app-bar-title">
+          <RouterLink to="/" class="app-bar-logo-link">
+            <v-img
+              src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.svg"
+              alt="FitLog"
+              width="36"
+              height="36"
+            />
+          </RouterLink>
+        </div>
 
-      <v-toolbar-title>FitLog</v-toolbar-title>
-
-      <v-spacer></v-spacer>
-
-      <v-btn variant="text" to="/">Home</v-btn>
-      <v-btn v-if="showSignedInButtons" variant="text" to="/workouts">Workouts</v-btn>
-      <v-btn v-if="showSignedInButtons" variant="text" to="/routines">Routines</v-btn>
-      <v-btn v-if="showSignedInButtons" variant="text" to="/meals">Meals</v-btn>
-      <v-btn v-if="showSignedInButtons" variant="text" to="/weight-logs">Weight Logs</v-btn>
-      <v-btn v-if="showSignedInButtons" variant="text" to="/body-profile">Body Profile</v-btn>
-
-      <v-menu>
-        <template v-slot:activator="{ props }">
-          <v-btn v-bind="props" prepend-icon="mdi-account-circle">
-            {{ authStore.user?.user_metadata?.username || 'Account' }}
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item v-if="showSignedOutButtons" to="/register" prepend-icon="mdi-account-plus"
-            >Register</v-list-item
+        <div class="app-bar-nav">
+          <v-btn :disabled="showSignedOutButtons" variant="text" to="/workouts">Workouts</v-btn>
+          <v-btn :disabled="showSignedOutButtons" variant="text" to="/routines">Routines</v-btn>
+          <v-btn :disabled="showSignedOutButtons" variant="text" to="/meals">Meals</v-btn>
+          <v-btn :disabled="showSignedOutButtons" variant="text" to="/weight-logs"
+            >Weight Logs</v-btn
           >
-          <v-list-item v-if="showSignedOutButtons" to="/login" prepend-icon="mdi-account"
-            >Log In</v-list-item
+          <v-btn :disabled="showSignedOutButtons" variant="text" to="/body-profile"
+            >Body Profile</v-btn
           >
-          <v-list-item v-if="showSignedInButtons" @click="handleLogout" prepend-icon="mdi-logout"
-            >Log Out</v-list-item
-          >
-        </v-list>
-      </v-menu>
+        </div>
 
-      <v-spacer></v-spacer>
+        <div class="app-bar-account">
+          <v-menu>
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" prepend-icon="mdi-account-circle">
+                {{ authStore.user?.user_metadata?.username || 'Account' }}
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                v-if="showSignedOutButtons"
+                to="/register"
+                prepend-icon="mdi-account-plus"
+                >Register</v-list-item
+              >
+              <v-list-item v-if="showSignedOutButtons" to="/login" prepend-icon="mdi-account"
+                >Log In</v-list-item
+              >
+              <v-list-item
+                v-if="showSignedInButtons"
+                @click="handleLogout"
+                prepend-icon="mdi-logout"
+                >Log Out</v-list-item
+              >
+            </v-list>
+          </v-menu>
+        </div>
+      </div>
     </v-app-bar>
 
     <v-main>
@@ -71,3 +89,31 @@ onMounted(async () => {
     </v-main>
   </v-app>
 </template>
+
+<style scoped>
+.app-bar-inner {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+.app-bar-title {
+  flex: 0 0 auto;
+}
+.app-bar-nav {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+.app-bar-account {
+  flex: 0 0 auto;
+}
+.app-bar-logo-link {
+  display: flex;
+  align-items: center;
+}
+</style>
