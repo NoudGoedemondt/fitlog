@@ -14,9 +14,9 @@ const headers = [
   { title: 'Actions', key: 'actions', align: 'end', sortable: false },
 ]
 
-function createNewRecord() {
+const createNewRecord = () => {
   return {
-    weight_kg: '',
+    weight_kg: 0,
     measured_at: '',
   }
 }
@@ -32,6 +32,39 @@ const openDialog = (target) => {
 
 const resetTargetAfterLeave = () => {
   dialogTarget.value = false
+}
+
+const add = () => {
+  formModel.value = createNewRecord()
+  openDialog('new')
+}
+
+const edit = (id) => {
+  const found = weightLogs.weightEntries.value.find((entry) => entry.id === id)
+
+  formModel.value = {
+    id: found.id,
+    weight_kg: found.weight_kg,
+    measured_at: found.measured_at,
+  }
+
+  openDialog(id)
+}
+
+// const removeEntry = () => {
+
+// }
+
+const save = () => {
+  if (dialogTarget.value === 'new') {
+    console.log('Adding entry')
+  } else if (typeof dialogTarget.value === 'number') {
+    console.log('updating entry:', dialogTarget.value)
+  } else {
+    console.log('this state should not be accessed')
+  }
+
+  dialogIsOpen.value = false
 }
 
 const dialogModeLabel = computed(() => {
@@ -59,7 +92,7 @@ onMounted(async () => {
           Weight Entries
         </v-toolbar-title>
 
-        <v-btn class="me-2" prepend-icon="mdi-plus" text="Add" @click="openDialog('new')"></v-btn>
+        <v-btn class="me-2" prepend-icon="mdi-plus" text="Add" @click="add"></v-btn>
       </v-toolbar>
     </template>
 
@@ -72,7 +105,7 @@ onMounted(async () => {
           color="medium-emphasis"
           icon="mdi-pencil"
           size="small"
-          @click="openDialog(item.id)"
+          @click="edit(item.id)"
         ></v-icon>
 
         <v-icon
@@ -110,7 +143,7 @@ onMounted(async () => {
 
         <v-spacer></v-spacer>
 
-        <v-btn :text="dialogModeLabel"></v-btn>
+        <v-btn text="Save" @click="save"></v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
