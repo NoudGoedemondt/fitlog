@@ -11,7 +11,7 @@ const headers = [
   { title: 'Measured at', key: 'measured_at' },
   { title: 'Created at', key: 'created_at' },
   { title: 'Updated at', key: 'updated_at' },
-  { title: 'Actions', key: 'actions', align: 'end', sortable: false },
+  { title: 'Actions', key: 'actions', align: 'end', sortable: false, width: '110px' },
 ]
 
 const createNewRecord = () => {
@@ -24,6 +24,9 @@ const createNewRecord = () => {
 const dialogTarget = ref(false) // false | 'new' | <id> — single source of truth
 const dialogIsOpen = ref(false) // controls dialog *visibility*
 const formModel = ref(createNewRecord())
+
+const deletingItemId = ref(null)
+const showRemoveButton = ref(false)
 
 const openDialog = (target) => {
   dialogTarget.value = target
@@ -51,9 +54,15 @@ const edit = (id) => {
   openDialog(id)
 }
 
-// const removeEntry = () => {
+const toggleRemove = (id) => {
+  deletingItemId.value = id
 
-// }
+  if (showRemoveButton.value) {
+    showRemoveButton.value = false
+  } else {
+    showRemoveButton.value = true
+  }
+}
 
 const save = () => {
   if (dialogTarget.value === 'new') {
@@ -65,6 +74,10 @@ const save = () => {
   }
 
   dialogIsOpen.value = false
+}
+
+const remove = (id) => {
+  console.log('remove item id:', id)
 }
 
 const dialogModeLabel = computed(() => {
@@ -112,8 +125,17 @@ onMounted(async () => {
           color="medium-emphasis"
           icon="mdi-delete"
           size="small"
-          @click="remove(item.id)"
+          @click="toggleRemove(item.id)"
         ></v-icon>
+
+        <v-slide-x-reverse-transition>
+          <v-icon
+            v-if="showRemoveButton && deletingItemId === item.id"
+            color="red"
+            icon="mdi-close"
+            @click="remove(item.id)"
+          ></v-icon>
+        </v-slide-x-reverse-transition>
       </div>
     </template>
   </v-data-table>
