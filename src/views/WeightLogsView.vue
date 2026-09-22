@@ -26,7 +26,6 @@ const dialogIsOpen = ref(false) // controls dialog *visibility*
 const formModel = ref(createNewRecord())
 
 const deletingItemId = ref(null)
-const showRemoveButton = ref(false)
 
 const openDialog = (target) => {
   dialogTarget.value = target
@@ -54,23 +53,13 @@ const edit = (id) => {
   openDialog(id)
 }
 
-const toggleRemove = (id) => {
-  deletingItemId.value = id
-
-  if (showRemoveButton.value) {
-    showRemoveButton.value = false
-  } else {
-    showRemoveButton.value = true
-  }
-}
-
 const save = () => {
   if (dialogTarget.value === 'new') {
-    console.log('Adding entry')
+    console.log('Adding entry:', formModel.value)
   } else if (typeof dialogTarget.value === 'number') {
-    console.log('updating entry:', dialogTarget.value)
+    console.log(`updating entry, ${dialogTarget.value} with value:`, formModel.value)
   } else {
-    console.log('this state should not be accessed')
+    console.error('Can not save entry, when dialogtarget is false')
   }
 
   dialogIsOpen.value = false
@@ -78,6 +67,10 @@ const save = () => {
 
 const remove = (id) => {
   console.log('remove item id:', id)
+}
+
+const toggleRemove = (id) => {
+  deletingItemId.value = deletingItemId.value === id ? null : id
 }
 
 const dialogModeLabel = computed(() => {
@@ -130,7 +123,7 @@ onMounted(async () => {
 
         <v-slide-x-reverse-transition>
           <v-icon
-            v-if="showRemoveButton && deletingItemId === item.id"
+            v-if="deletingItemId === item.id"
             color="red"
             icon="mdi-close"
             @click="remove(item.id)"
@@ -149,6 +142,8 @@ onMounted(async () => {
           label="Date"
           class="mt-5"
         ></v-date-input>
+
+        <v-time-picker></v-time-picker>
 
         <v-number-input
           v-model="formModel.weight_kg"
