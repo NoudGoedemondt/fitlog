@@ -1,7 +1,9 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { useWeightLogs } from '../composables/useWeightLogs.js'
+//import { useAuthStore } from '@/stores/auth.js'
 
+// const authStore = useAuthStore()
 const weightLogs = useWeightLogs()
 
 const headers = [
@@ -17,7 +19,9 @@ const headers = [
 const createNewRecord = () => {
   return {
     weight_kg: 0,
-    measured_at: '',
+    date: null,
+    hour: null,
+    minute: null,
   }
 }
 
@@ -137,13 +141,31 @@ onMounted(async () => {
     <v-card prepend-icon="mdi-update" :title="`${dialogModeLabel} Weight Entry`">
       <template v-slot:text>
         <v-date-input
-          v-model="formModel.measured_at"
+          v-model="formModel.date"
           input-format="dd-mm-yyyy"
           label="Date"
           class="mt-5"
         ></v-date-input>
 
-        <v-time-picker></v-time-picker>
+        <div class="d-flex ga-2">
+          <v-number-input
+            v-model="formModel.hour"
+            prepend-icon="mdi-clock-outline"
+            control-variant="stacked"
+            :min="0"
+            :max="23"
+            :step="1"
+            label="Hour"
+          ></v-number-input>
+          <v-number-input
+            v-model="formModel.minute"
+            control-variant="stacked"
+            :min="0"
+            :max="59"
+            :step="1"
+            label="Minute"
+          ></v-number-input>
+        </div>
 
         <v-number-input
           v-model="formModel.weight_kg"
