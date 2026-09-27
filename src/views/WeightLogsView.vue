@@ -1,9 +1,10 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { useWeightLogs } from '../composables/useWeightLogs.js'
-//import { useAuthStore } from '@/stores/auth.js'
+import { splitMeasuredAt, combineToMeasuredAt } from '@/utils/measuredAtFormatting.js'
+import { useAuthStore } from '@/stores/auth.js'
 
-// const authStore = useAuthStore()
+const authStore = useAuthStore()
 const weightLogs = useWeightLogs()
 
 const headers = [
@@ -25,10 +26,9 @@ const createNewRecord = () => {
   }
 }
 
+const formModel = ref(createNewRecord())
 const dialogTarget = ref(false) // false | 'new' | <id> — single source of truth
 const dialogIsOpen = ref(false) // controls dialog *visibility*
-const formModel = ref(createNewRecord())
-
 const deletingItemId = ref(null)
 
 const openDialog = (target) => {
@@ -47,21 +47,39 @@ const add = () => {
 
 const edit = (id) => {
   const found = weightLogs.weightEntries.value.find((entry) => entry.id === id)
+  const { date, hour, minute } = splitMeasuredAt(found.measured_at)
 
   formModel.value = {
     id: found.id,
     weight_kg: found.weight_kg,
-    measured_at: found.measured_at,
+    date: date,
+    hour: hour,
+    minute: minute,
   }
 
   openDialog(id)
 }
 
-const save = () => {
+const save = async () => {
+  const measuredAt = combineToMeasuredAt(
+    formModel.value.date,
+    formModel.value.hour,
+    formModel.value.minute,
+  )
+
   if (dialogTarget.value === 'new') {
-    console.log('Adding entry:', formModel.value)
+    const userId = authStore.user.id
+
+    await weightLogs.createWeightEntry({
+      user_id: userId,
+      weight_kg: formModel.value.weight_kg,
+      measured_at: measuredAt,
+    })
   } else if (typeof dialogTarget.value === 'number') {
-    console.log(`updating entry, ${dialogTarget.value} with value:`, formModel.value)
+    await weightLogs.updateWeightEntry(dialogTarget.value, {
+      weight_kg: formModel.value.weight_kg,
+      measured_at: measuredAt,
+    })
   } else {
     console.error('Can not save entry, when dialogtarget is false')
   }
@@ -69,8 +87,8 @@ const save = () => {
   dialogIsOpen.value = false
 }
 
-const remove = (id) => {
-  console.log('remove item id:', id)
+const remove = async (id) => {
+  await weightLogs.deleteWeightEntry(id)
 }
 
 const toggleRemove = (id) => {
@@ -186,4 +204,6 @@ onMounted(async () => {
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <!-- <v-alert color="error" icon="$error" title="Alert Title" text="Alert subtext"></v-alert> -->
 </template>
