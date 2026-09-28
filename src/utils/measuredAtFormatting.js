@@ -18,7 +18,7 @@ export function combineToMeasuredAt(date, hour, minute) {
 export function splitMeasuredAt(timestampStr) {
   if (!timestampStr || typeof timestampStr !== 'string') {
     console.error('splitMeasuredAt: Parameter timestampStr is null or not a string')
-    return null
+    return { date: null, hour: null, minute: null }
   }
 
   // Split the "YYYY-MM-DD" and "hh:mm:ss" parts
