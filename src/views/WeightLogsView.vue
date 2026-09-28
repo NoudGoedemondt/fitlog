@@ -3,6 +3,7 @@ import { computed, ref, onMounted } from 'vue'
 import { useWeightLogs } from '../composables/useWeightLogs.js'
 import { splitMeasuredAt, combineToMeasuredAt } from '@/utils/measuredAtFormatting.js'
 import { useAuthStore } from '@/stores/auth.js'
+import { required, positiveNumber } from '@/utils/validationRules.js'
 
 const authStore = useAuthStore()
 const weightLogs = useWeightLogs()
@@ -27,6 +28,7 @@ const createNewRecord = () => {
 }
 
 const formModel = ref(createNewRecord())
+const weightEntryForm = ref(null)
 const dialogTarget = ref(false) // false | 'new' | <id> — single source of truth
 const dialogIsOpen = ref(false) // controls dialog *visibility*
 const deletingItemId = ref(null)
@@ -61,6 +63,9 @@ const edit = (id) => {
 }
 
 const save = async () => {
+  const { valid } = await weightEntryForm.value.validate()
+  if (!valid) return
+
   const measuredAt = combineToMeasuredAt(
     formModel.value.date,
     formModel.value.hour,
@@ -70,12 +75,16 @@ const save = async () => {
   if (dialogTarget.value === 'new') {
     const userId = authStore.user.id
 
+    // Before creating, check if measuredAt returned null and throw and error
+    // Also needs to check and resolve mutation errors
     await weightLogs.createWeightEntry({
       user_id: userId,
       weight_kg: formModel.value.weight_kg,
       measured_at: measuredAt,
     })
   } else if (typeof dialogTarget.value === 'number') {
+    // Before updating, check if measuredAt returned null and throw and error
+    // Also needs to check and resolve mutation errors
     await weightLogs.updateWeightEntry(dialogTarget.value, {
       weight_kg: formModel.value.weight_kg,
       measured_at: measuredAt,
@@ -88,6 +97,7 @@ const save = async () => {
 }
 
 const remove = async (id) => {
+  // Needs to check and resolve mutation errors
   await weightLogs.deleteWeightEntry(id)
 }
 
@@ -102,6 +112,7 @@ const dialogModeLabel = computed(() => {
 })
 
 onMounted(async () => {
+  // Needs to check and resolve fetch errors
   await weightLogs.fetchAllWeights()
 })
 </script>
@@ -158,39 +169,45 @@ onMounted(async () => {
   <v-dialog v-model="dialogIsOpen" max-width="400" @after-leave="resetTargetAfterLeave">
     <v-card prepend-icon="mdi-update" :title="`${dialogModeLabel} Weight Entry`">
       <template v-slot:text>
-        <v-date-input
-          v-model="formModel.date"
-          input-format="dd-mm-yyyy"
-          label="Date"
-          class="mt-5"
-        ></v-date-input>
+        <v-form ref="weightEntryForm" @submit.prevent="save">
+          <v-date-input
+            v-model="formModel.date"
+            input-format="dd-mm-yyyy"
+            label="Date"
+            :rules="[required]"
+            class="my-5"
+          ></v-date-input>
 
-        <div class="d-flex ga-2">
-          <v-number-input
-            v-model="formModel.hour"
-            prepend-icon="mdi-clock-outline"
-            control-variant="stacked"
-            :min="0"
-            :max="23"
-            :step="1"
-            label="Hour"
-          ></v-number-input>
-          <v-number-input
-            v-model="formModel.minute"
-            control-variant="stacked"
-            :min="0"
-            :max="59"
-            :step="1"
-            label="Minute"
-          ></v-number-input>
-        </div>
+          <div class="d-flex ga-2 mb-5">
+            <v-number-input
+              v-model="formModel.hour"
+              prepend-icon="mdi-clock-outline"
+              control-variant="stacked"
+              :min="0"
+              :max="23"
+              :step="1"
+              label="Hour"
+              :rules="[required]"
+            ></v-number-input>
+            <v-number-input
+              v-model="formModel.minute"
+              control-variant="stacked"
+              :min="0"
+              :max="59"
+              :step="1"
+              label="Minute"
+              :rules="[required]"
+            ></v-number-input>
+          </div>
 
-        <v-number-input
-          v-model="formModel.weight_kg"
-          :precision="2"
-          :min="0"
-          label="Weight (kg)"
-        ></v-number-input>
+          <v-number-input
+            v-model="formModel.weight_kg"
+            :precision="2"
+            :min="0"
+            label="Weight (kg)"
+            :rules="[required, positiveNumber]"
+          ></v-number-input>
+        </v-form>
       </template>
 
       <v-divider></v-divider>
