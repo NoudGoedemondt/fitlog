@@ -4,13 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "run-s \"lint:*\"",
-    "lint:oxlint": "oxlint . --fix",
-    "lint:eslint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/"
+    "lint:check": "run-s lint:oxlint:check lint:eslint:check",
+    "lint:oxlint:check": "oxlint .",
+    "lint:eslint:check": "eslint .",
+    "format:check": "prettier --check src/"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
