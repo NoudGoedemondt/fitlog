@@ -21,7 +21,7 @@ const headers = [
 const createNewRecord = () => {
   return {
     weight_kg: 0,
-    date: null,
+    date: new Date(),
     hour: null,
     minute: null,
   }
