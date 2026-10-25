@@ -1,10 +1,22 @@
 <script setup>
-import { RouterView } from 'vue-router'
-import { onMounted, computed } from 'vue'
+import { RouterView, useRoute, useRouter } from 'vue-router'
+import { onMounted, computed, watch } from 'vue'
 import { supabase } from './plugins/supabase.js'
 import { useAuthStore } from './stores/auth.js'
 
 const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
+
+watch(
+  [() => authStore.isLoading, () => authStore.user, () => route.meta.requiresAuth],
+  ([isLoading, user, requiresAuth]) => {
+    if (!isLoading && !user && requiresAuth) {
+      void router.replace({ name: 'login' })
+    }
+  },
+  { immediate: true },
+)
 
 const handleLogout = async () => {
   const { error } = await supabase.auth.signOut()
