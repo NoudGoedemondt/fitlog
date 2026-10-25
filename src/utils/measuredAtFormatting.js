@@ -1,43 +1,53 @@
+import { validDate, validHour, validMinute } from './validationRules.js'
+
+const createCalendarDate = (year, month, day) => {
+  const date = new Date(0)
+  date.setHours(0, 0, 0, 0)
+  date.setFullYear(year, month - 1, day)
+
+  if (
+    validDate(date) !== true ||
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null
+  }
+
+  return date
+}
+
+export function parseDateInput(value) {
+  const match = typeof value === 'string' && /^(\d{2})-(\d{2})-(\d{4})$/.exec(value.trim())
+  if (!match) return null
+  return createCalendarDate(Number(match[3]), Number(match[2]), Number(match[1]))
+}
+
 export function combineToMeasuredAt(date, hour, minute) {
-  if (!(date instanceof Date) || isNaN(date)) {
-    console.error('combineToMeasuredAt: Parameter date not a Date object or is NaN')
+  if (validDate(date) !== true || validHour(hour) !== true || validMinute(minute) !== true) {
     return null
   }
 
   const pad = (num) => String(num).padStart(2, '0')
-
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
-  const hours = pad(hour)
-  const minutes = pad(minute)
-
-  return `${year}-${month}-${day}T${hours}:${minutes}:00`
+  const year = String(date.getFullYear()).padStart(4, '0')
+  return `${year}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(hour)}:${pad(minute)}:00`
 }
 
 export function splitMeasuredAt(timestampStr) {
-  if (!timestampStr || typeof timestampStr !== 'string') {
-    console.error('splitMeasuredAt: Parameter timestampStr is null or not a string')
-    return { date: null, hour: null, minute: null }
+  const empty = { date: null, hour: null, minute: null }
+  const match =
+    typeof timestampStr === 'string' &&
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?$/.exec(timestampStr)
+  if (!match) return empty
+
+  const [, year, month, day, hours, minutes, seconds] = match
+  const date = createCalendarDate(Number(year), Number(month), Number(day))
+  const hour = Number(hours)
+  const minute = Number(minutes)
+
+  if (!date || validHour(hour) !== true || validMinute(minute) !== true || Number(seconds) > 59) {
+    return empty
   }
 
-  // Split the "YYYY-MM-DD" and "hh:mm:ss" parts
-  const [datePart, timePart] = timestampStr.split('T')
-  if (!datePart || !timePart) return null
-
-  // Extract year, month, day
-  const [year, month, day] = datePart.split('-').map(Number)
-
-  // Extract hour and minute
-  const [hour, minute] = timePart.split(':').map(Number)
-
-  // Reconstruct a standard JavaScript Date object set to midnight for the "date" property
-  // Note: month - 1 converts calendar month (1-12) back to JS month (0-11)
-  const dateObj = new Date(year, month - 1, day)
-
-  return {
-    date: dateObj,
-    hour: hour,
-    minute: minute,
-  }
+  return { date, hour, minute }
 }
