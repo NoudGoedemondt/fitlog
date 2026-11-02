@@ -51,3 +51,12 @@ export function splitMeasuredAt(timestampStr) {
 
   return { date, hour, minute }
 }
+
+export function formatMeasuredAt(value) {
+  const { date, hour, minute } = splitMeasuredAt(value)
+  if (!date) return '—'
+
+  const pad = (number) => String(number).padStart(2, '0')
+  const year = String(date.getFullYear()).padStart(4, '0')
+  return `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${year} ${pad(hour)}:${pad(minute)}`
+}

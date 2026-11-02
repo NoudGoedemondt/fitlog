@@ -1,0 +1,47 @@
+.dialog-actions .v-btn {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.entry-dialog {
+  background: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 24px 4px;
+}
+
+.dialog-icon {
+  display: inline-flex;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgb(var(--v-theme-surface-accent));
+  color: rgb(var(--v-theme-primary));
+}
+
+.dialog-heading h2 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.dialog-heading p {
+  margin-top: 3px;
+  color: rgb(var(--v-theme-on-surface-variant));
+  font-size: 12px;
+}
+
+.dialog-actions {
+  padding: 16px 24px;
+}
+
+@media (max-width: 600px) {
+  .dialog-actions {
+    flex-wrap: wrap;
+    padding-inline: 16px;
+  }
+}
