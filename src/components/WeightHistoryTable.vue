@@ -102,12 +102,6 @@ const headers = [
 </template>
 
 <style scoped>
-.eyebrow-line {
-  width: 22px;
-  height: 2px;
-  background: currentColor;
-}
-
 .history-heading p {
   color: rgb(var(--v-theme-on-surface-variant));
   font-size: 14px;

@@ -227,6 +227,12 @@ onMounted(async () => {
   letter-spacing: 0.15em;
 }
 
+.eyebrow-line {
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+}
+
 .page-heading h1 {
   margin: 8px 0;
   font-size: clamp(32px, 4vw, 44px);
