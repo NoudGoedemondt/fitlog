@@ -61,6 +61,19 @@ const router = createRouter({
       meta: { authCallback: true },
     },
     {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('../views/ForgotPasswordView.vue'),
+      // Recovery must remain available even if an older session is still active.
+      meta: { authPage: true },
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('../views/ResetPasswordView.vue'),
+      meta: { authCallback: true },
+    },
+    {
       path: '/body-profile',
       name: 'body-profile',
       component: () => import('../views/BodyProfileView.vue'),

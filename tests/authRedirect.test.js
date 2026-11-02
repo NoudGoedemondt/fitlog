@@ -14,6 +14,8 @@ const createTestRouter = (user = null) => {
       { path: '/register', name: 'register', component, meta: { guestOnly: true } },
       { path: '/verify-email', name: 'verify-email', component, meta: { guestOnly: true } },
       { path: '/auth/confirm', name: 'auth-confirm', component, meta: { authCallback: true } },
+      { path: '/forgot-password', name: 'forgot-password', component, meta: { authPage: true } },
+      { path: '/reset-password', name: 'reset-password', component, meta: { authCallback: true } },
       { path: '/weight-logs', name: 'weight-logs', component, meta: { requiresAuth: true } },
     ],
   })
@@ -84,6 +86,8 @@ test('rejects external, malformed, repeated and guest-only return destinations',
     '/register?redirect=/login',
     '/verify-email',
     '/auth/confirm',
+    '/forgot-password',
+    '/reset-password',
     '/auth/confirm?redirect=/login#provider-parameters',
   ]
   for (const value of invalid) {
@@ -120,4 +124,12 @@ test('the confirmation callback remains accessible even with an existing session
   const { router } = createTestRouter({ id: 'test-user' })
   await router.push('/auth/confirm?redirect=/weight-logs#error=access_denied')
   assert.equal(router.currentRoute.value.name, 'auth-confirm')
+})
+
+test('password recovery pages remain accessible during an existing session', async () => {
+  const { router } = createTestRouter({ id: 'test-user' })
+  for (const path of ['/forgot-password', '/reset-password']) {
+    await router.push(path)
+    assert.equal(router.currentRoute.value.path, path)
+  }
 })

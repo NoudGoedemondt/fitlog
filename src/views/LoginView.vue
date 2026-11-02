@@ -104,6 +104,16 @@ const loginUser = async () => {
           ></v-btn>
         </template>
       </v-text-field>
+      <div class="password-recovery-link">
+        <RouterLink
+          :to="{
+            name: 'forgot-password',
+            query: { redirect: route.query.redirect },
+            state: { recoveryEmail: userEmail },
+          }"
+          >Forgot password?</RouterLink
+        >
+      </div>
       <v-alert v-if="errorMessage" class="auth-error" variant="tonal" type="error">
         {{ errorMessage }}
       </v-alert>
@@ -130,3 +140,24 @@ const loginUser = async () => {
     </template>
   </AuthFormCard>
 </template>
+
+<style scoped>
+.password-recovery-link {
+  margin-bottom: 16px;
+  text-align: right;
+  font-size: 12px;
+}
+
+.password-recovery-link a {
+  display: inline-block;
+  padding-block: 4px;
+  color: rgb(var(--v-theme-primary));
+  text-underline-offset: 3px;
+}
+
+.password-recovery-link a:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+</style>

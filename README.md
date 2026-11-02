@@ -80,3 +80,27 @@ the Supabase dashboard before using this flow there:
 See the official [password authentication](https://supabase.com/docs/guides/auth/passwords),
 [redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls), and
 [resend](https://supabase.com/docs/reference/javascript/auth-resend) documentation.
+
+## Password recovery
+
+Login links to `/forgot-password`, which calls `resetPasswordForEmail` with a callback
+to `/reset-password`. The original internal destination is preserved. Responses do
+not disclose whether an address has an account; retries have a 60-second cooldown.
+The address and cooldown timestamp are kept in browser history state, not the URL.
+
+The reset page waits for Supabase to process the link, checks initialization errors
+and requests the current user from Supabase before showing the password form. Invalid
+or expired links show a new-link action, even if an older session exists. A valid
+existing authenticated session may also update its own password through this page.
+Before saving, the page rechecks that the session still belongs to the same account.
+Passwords are submitted with `updateUser`, cleared from the form after success, and
+never stored in URLs or browser history state. The reset page remains open when a
+recovery session signs in, rather than being redirected away as a guest-only page.
+
+Local callback URLs are included in `supabase/config.toml`. For hosted Supabase, add
+`https://your-app.example/reset-password**` to **Redirect URLs**, restricted to your
+actual frontend host. Keep the reset email template's `{{ .ConfirmationURL }}` link
+and configure SMTP for production delivery. Use Mailpit locally to test delivery.
+
+See [password reset requests](https://supabase.com/docs/reference/javascript/auth-resetpasswordforemail)
+and [updating a password](https://supabase.com/docs/reference/javascript/auth-updateuser).

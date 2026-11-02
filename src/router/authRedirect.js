@@ -17,7 +17,9 @@ export function getAuthRedirect(router, value) {
     const target = router.resolve(value)
     if (
       !target.matched.length ||
-      target.matched.some((record) => record.meta.guestOnly || record.meta.authCallback)
+      target.matched.some(
+        (record) => record.meta.guestOnly || record.meta.authCallback || record.meta.authPage,
+      )
     ) {
       return fallback
     }
