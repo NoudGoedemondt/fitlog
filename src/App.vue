@@ -3,6 +3,7 @@ import { RouterView, useRoute, useRouter } from 'vue-router'
 import { onMounted, computed, watch } from 'vue'
 import { supabase } from './plugins/supabase.js'
 import { useAuthStore } from './stores/auth.js'
+import iconFitlog from '@/components/icons/IconFitlog.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -44,12 +45,7 @@ onMounted(async () => {
       <div class="app-bar-inner">
         <div class="app-bar-title">
           <RouterLink to="/" class="app-bar-logo-link">
-            <v-img
-              src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.svg"
-              alt="FitLog"
-              width="36"
-              height="36"
-            />
+            <iconFitlog primary="#FFFFFF" secondary="#201E1F" class="fitlog-logo" />
           </RouterLink>
         </div>
 
@@ -103,11 +99,15 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.fitlog-logo {
+  width: 48px;
+  height: 48px;
+}
 .app-bar-inner {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1060px;
   margin-inline: auto;
   padding-inline: 16px;
 }
