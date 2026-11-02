@@ -8,6 +8,7 @@ import AuthFormCard from '@/components/AuthFormCard.vue'
 const router = useRouter()
 const userEmail = ref('')
 const userPassword = ref('')
+const showPassword = ref(false)
 const errorMessage = ref('')
 const isLoading = ref(false)
 const loginForm = ref(null)
@@ -70,11 +71,26 @@ const loginUser = async () => {
         name="password"
         autocomplete="current-password"
         prepend-inner-icon="mdi-lock-outline"
-        type="password"
+        :type="showPassword ? 'text' : 'password'"
         variant="outlined"
         density="comfortable"
         color="primary"
-      ></v-text-field>
+      >
+        <template #append-inner>
+          <v-btn
+            :icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+            :aria-pressed="showPassword"
+            :disabled="isLoading"
+            type="button"
+            variant="text"
+            size="small"
+            density="comfortable"
+            @mousedown.prevent
+            @click="showPassword = !showPassword"
+          ></v-btn>
+        </template>
+      </v-text-field>
       <v-alert v-if="errorMessage" class="auth-error" variant="tonal" type="error">
         {{ errorMessage }}
       </v-alert>

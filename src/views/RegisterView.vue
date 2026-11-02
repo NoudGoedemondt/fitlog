@@ -11,6 +11,8 @@ const userEmail1 = ref('')
 const userEmail2 = ref('')
 const userPassword1 = ref('')
 const userPassword2 = ref('')
+const showPassword = ref(false)
+const showPasswordConfirmation = ref(false)
 const errorMessage = ref('')
 const isLoading = ref(false)
 const registerForm = ref(null)
@@ -100,11 +102,26 @@ const registerUser = async () => {
         hint="At least 6 characters."
         persistent-hint
         prepend-inner-icon="mdi-lock-outline"
-        type="password"
+        :type="showPassword ? 'text' : 'password'"
         variant="outlined"
         density="comfortable"
         color="primary"
-      ></v-text-field>
+      >
+        <template #append-inner>
+          <v-btn
+            :icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+            :aria-pressed="showPassword"
+            :disabled="isLoading"
+            type="button"
+            variant="text"
+            size="small"
+            density="comfortable"
+            @mousedown.prevent
+            @click="showPassword = !showPassword"
+          ></v-btn>
+        </template>
+      </v-text-field>
       <v-text-field
         v-model="userPassword2"
         :rules="[required, minLength(6), matchOther(userPassword1, 'Passwords')]"
@@ -112,11 +129,28 @@ const registerUser = async () => {
         name="password-confirmation"
         autocomplete="new-password"
         prepend-inner-icon="mdi-lock-outline"
-        type="password"
+        :type="showPasswordConfirmation ? 'text' : 'password'"
         variant="outlined"
         density="comfortable"
         color="primary"
-      ></v-text-field>
+      >
+        <template #append-inner>
+          <v-btn
+            :icon="showPasswordConfirmation ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            :aria-label="
+              showPasswordConfirmation ? 'Hide password confirmation' : 'Show password confirmation'
+            "
+            :aria-pressed="showPasswordConfirmation"
+            :disabled="isLoading"
+            type="button"
+            variant="text"
+            size="small"
+            density="comfortable"
+            @mousedown.prevent
+            @click="showPasswordConfirmation = !showPasswordConfirmation"
+          ></v-btn>
+        </template>
+      </v-text-field>
       <v-alert v-if="errorMessage" class="auth-error" variant="tonal" type="error">{{
         errorMessage
       }}</v-alert>
