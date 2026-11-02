@@ -9,7 +9,8 @@
     "lint:check": "run-s lint:oxlint:check lint:eslint:check",
     "lint:oxlint:check": "oxlint .",
     "lint:eslint:check": "eslint .",
-    "format:check": "prettier --check src/"
+    "format:check": "prettier --check src/",
+    "build": "vite build"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
