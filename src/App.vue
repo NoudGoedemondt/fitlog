@@ -1,6 +1,7 @@
 <script setup>
 import { RouterView, useRoute, useRouter } from 'vue-router'
-import { onMounted, computed, watch } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
+import { useDisplay } from 'vuetify'
 import { supabase } from './plugins/supabase.js'
 import { useAuthStore } from './stores/auth.js'
 import iconFitlog from '@/components/icons/IconFitlog.vue'
@@ -8,6 +9,21 @@ import iconFitlog from '@/components/icons/IconFitlog.vue'
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+const { smAndDown } = useDisplay()
+const mobileNavigationIsOpen = ref(false)
+const navigationItems = [
+  { title: 'Workouts', to: '/workouts', icon: 'mdi-dumbbell' },
+  { title: 'Routines', to: '/routines', icon: 'mdi-clipboard-text-outline' },
+  { title: 'Meals', to: '/meals', icon: 'mdi-food-apple-outline' },
+  { title: 'Weight logs', to: '/weight-logs', icon: 'mdi-scale-bathroom' },
+  { title: 'Body profile', to: '/body-profile', icon: 'mdi-account-outline' },
+]
+const navigationIsDisabled = computed(() => authStore.isLoading || !authStore.user)
+const accountLabel = computed(() => authStore.user?.user_metadata?.username || 'Account')
+
+watch([() => route.fullPath, smAndDown], () => {
+  mobileNavigationIsOpen.value = false
+})
 
 watch(
   [() => authStore.isLoading, () => authStore.user, () => route.meta.requiresAuth],
@@ -41,54 +57,127 @@ onMounted(async () => {
 
 <template>
   <v-app>
-    <v-app-bar color="primary">
-      <div class="app-bar-inner">
-        <div class="app-bar-title">
-          <RouterLink to="/" class="app-bar-logo-link">
-            <iconFitlog class="fitlog-logo" />
+    <v-app-bar class="app-bar" color="surface" :height="smAndDown ? 64 : 80" :elevation="0">
+      <v-container class="app-bar-container">
+        <div class="app-bar-inner">
+          <v-btn
+            v-if="smAndDown"
+            class="mobile-menu-button"
+            icon="mdi-menu"
+            variant="text"
+            size="small"
+            aria-label="Open navigation menu"
+            aria-controls="mobile-navigation"
+            :aria-expanded="mobileNavigationIsOpen"
+            @click="mobileNavigationIsOpen = !mobileNavigationIsOpen"
+          ></v-btn>
+
+          <RouterLink to="/" class="app-bar-logo-link" aria-label="FitLog home">
+            <iconFitlog
+              class="fitlog-logo"
+              primary="rgb(var(--v-theme-primary))"
+              secondary="rgb(var(--v-theme-on-primary))"
+              aria-hidden="true"
+            />
+            <span class="brand-name">FitLog</span>
           </RouterLink>
-        </div>
 
-        <div class="app-bar-nav">
-          <v-btn :disabled="showSignedOutButtons" variant="text" to="/workouts">Workouts</v-btn>
-          <v-btn :disabled="showSignedOutButtons" variant="text" to="/routines">Routines</v-btn>
-          <v-btn :disabled="showSignedOutButtons" variant="text" to="/meals">Meals</v-btn>
-          <v-btn :disabled="showSignedOutButtons" variant="text" to="/weight-logs"
-            >Weight Logs</v-btn
-          >
-          <v-btn :disabled="showSignedOutButtons" variant="text" to="/body-profile"
-            >Body Profile</v-btn
-          >
-        </div>
+          <nav v-if="!smAndDown" class="app-bar-nav" aria-label="Primary navigation">
+            <v-btn
+              v-for="item in navigationItems"
+              :key="item.to"
+              class="navigation-link"
+              :disabled="navigationIsDisabled"
+              :to="item.to"
+              :active="route.path === item.to"
+              variant="text"
+              rounded="lg"
+              >{{ item.title }}</v-btn
+            >
+          </nav>
 
-        <div class="app-bar-account">
-          <v-menu>
-            <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" prepend-icon="mdi-account-circle">
-                {{ authStore.user?.user_metadata?.username || 'Account' }}
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-                v-if="showSignedOutButtons"
-                to="/register"
-                prepend-icon="mdi-account-plus"
-                >Register</v-list-item
+          <div class="app-bar-account">
+            <v-menu location="bottom end" :offset="10" rounded="lg">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  class="account-button"
+                  variant="text"
+                  rounded="lg"
+                  :aria-label="`Account menu: ${accountLabel}`"
+                >
+                  <v-icon icon="mdi-account-circle-outline" size="24"></v-icon>
+                  <span class="account-label">{{ accountLabel }}</span>
+                  <v-icon class="account-chevron" icon="mdi-chevron-down" size="16"></v-icon>
+                </v-btn>
+              </template>
+              <v-list
+                class="account-menu"
+                density="comfortable"
+                min-width="200"
+                aria-label="Account"
               >
-              <v-list-item v-if="showSignedOutButtons" to="/login" prepend-icon="mdi-account"
-                >Log In</v-list-item
-              >
-              <v-list-item
-                v-if="showSignedInButtons"
-                @click="handleLogout"
-                prepend-icon="mdi-logout"
-                >Log Out</v-list-item
-              >
-            </v-list>
-          </v-menu>
+                <v-list-item
+                  v-if="showSignedOutButtons"
+                  to="/register"
+                  prepend-icon="mdi-account-plus-outline"
+                  title="Register"
+                ></v-list-item>
+                <v-list-item
+                  v-if="showSignedOutButtons"
+                  to="/login"
+                  prepend-icon="mdi-login"
+                  title="Log in"
+                ></v-list-item>
+                <v-list-item
+                  v-if="showSignedInButtons"
+                  prepend-icon="mdi-logout"
+                  title="Log out"
+                  @click="handleLogout"
+                ></v-list-item>
+              </v-list>
+            </v-menu>
+          </div>
         </div>
-      </div>
+      </v-container>
     </v-app-bar>
+
+    <v-navigation-drawer
+      v-if="smAndDown"
+      id="mobile-navigation"
+      v-model="mobileNavigationIsOpen"
+      class="mobile-navigation"
+      temporary
+      color="surface"
+      :width="288"
+      aria-label="Primary navigation"
+      tag="nav"
+    >
+      <div class="mobile-navigation-heading">
+        <h2>Navigation</h2>
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          size="small"
+          aria-label="Close navigation menu"
+          @click="mobileNavigationIsOpen = false"
+        ></v-btn>
+      </div>
+      <v-list class="mobile-navigation-list" nav>
+        <v-list-item
+          v-for="item in navigationItems"
+          :key="item.to"
+          :to="item.to"
+          :title="item.title"
+          :prepend-icon="item.icon"
+          :disabled="navigationIsDisabled"
+          :active="route.path === item.to"
+          color="primary"
+          rounded="lg"
+          @click="mobileNavigationIsOpen = false"
+        ></v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <v-main>
       <v-container>
@@ -99,33 +188,172 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.fitlog-logo {
-  width: 48px;
-  height: 48px;
+.app-bar {
+  border-bottom: 1px solid rgb(var(--v-theme-outline));
 }
+
+.app-bar-container {
+  padding-block: 0;
+}
+
 .app-bar-inner {
   display: flex;
   align-items: center;
+  gap: 24px;
   width: 100%;
   max-width: 1060px;
   margin-inline: auto;
-  padding-inline: 16px;
 }
-.app-bar-title {
-  flex: 0 0 auto;
+
+.app-bar-logo-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  color: rgb(var(--v-theme-on-surface));
+  text-decoration: none;
+  border-radius: 8px;
 }
+
+.app-bar-logo-link:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: 4px;
+}
+
+.fitlog-logo {
+  width: 44px;
+  height: 44px;
+}
+
+.brand-name {
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.055em;
+}
+
 .app-bar-nav {
-  flex: 1 1 auto;
   display: flex;
+  flex: 1 1 auto;
   justify-content: center;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
+
+.navigation-link {
+  min-width: 0;
+  padding-inline: 12px;
+  color: rgb(var(--v-theme-on-surface-variant));
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.navigation-link.v-btn--active {
+  background: rgb(var(--v-theme-surface-accent));
+  color: rgb(var(--v-theme-primary));
+}
+
+.navigation-link :deep(.v-btn__overlay) {
+  opacity: 0;
+}
+
+.navigation-link:hover :deep(.v-btn__overlay),
+.navigation-link:focus-visible :deep(.v-btn__overlay) {
+  opacity: var(--v-hover-opacity);
+}
+
 .app-bar-account {
-  flex: 0 0 auto;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: 20px;
+  border-left: 1px solid rgb(var(--v-theme-outline));
 }
-.app-bar-logo-link {
+
+.account-button {
+  min-width: 0;
+  padding-inline: 10px;
+  color: rgb(var(--v-theme-on-surface-variant));
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.account-label {
+  overflow: hidden;
+  max-width: 120px;
+  margin-inline: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.account-menu {
+  padding: 6px;
+  border: 1px solid rgb(var(--v-theme-outline));
+}
+
+.account-menu :deep(.v-list-item) {
+  border-radius: 6px;
+}
+
+.mobile-menu-button {
+  color: rgb(var(--v-theme-on-surface-variant));
+}
+
+.mobile-navigation {
+  border-right: 1px solid rgb(var(--v-theme-outline));
+}
+
+.mobile-navigation-heading {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 18px 16px 12px 24px;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.mobile-navigation-heading h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.mobile-navigation-list {
+  padding: 8px 16px;
+}
+
+.mobile-navigation-list :deep(.v-list-item) {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 959px) {
+  .app-bar-inner {
+    gap: 8px;
+  }
+
+  .fitlog-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .brand-name {
+    font-size: 21px;
+  }
+
+  .app-bar-account {
+    padding-left: 8px;
+    border-left: 0;
+  }
+
+  .account-button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+
+  .account-label,
+  .account-chevron {
+    display: none;
+  }
 }
 </style>
