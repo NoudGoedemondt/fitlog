@@ -45,7 +45,7 @@ onMounted(async () => {
       <div class="app-bar-inner">
         <div class="app-bar-title">
           <RouterLink to="/" class="app-bar-logo-link">
-            <iconFitlog primary="#FFFFFF" secondary="#201E1F" class="fitlog-logo" />
+            <iconFitlog class="fitlog-logo" />
           </RouterLink>
         </div>
 
