@@ -3,88 +3,96 @@ import { supabase } from '../plugins/supabase.js'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { required, isEmail } from '../utils/validationRules.js'
+import AuthFormCard from '@/components/AuthFormCard.vue'
 
 const router = useRouter()
-
 const userEmail = ref('')
 const userPassword = ref('')
 const errorMessage = ref('')
 const isLoading = ref(false)
-
 const loginForm = ref(null)
 
 const loginUser = async () => {
-  const { valid } = await loginForm.value.validate()
-  if (!valid) return
-
+  if (isLoading.value || !loginForm.value) return
   isLoading.value = true
   errorMessage.value = ''
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email: userEmail.value,
-    password: userPassword.value,
-  })
+  try {
+    const { valid } = await loginForm.value.validate()
+    if (!valid) return
 
-  isLoading.value = false
-
-  if (error) {
-    errorMessage.value = error.message
-  } else {
-    router.push('/')
+    const { error } = await supabase.auth.signInWithPassword({
+      email: userEmail.value,
+      password: userPassword.value,
+    })
+    if (error) {
+      errorMessage.value = error.message
+      return
+    }
+    await router.push('/')
+  } catch (error) {
+    errorMessage.value = error?.message || 'Unable to log in. Please try again.'
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
 
 <template>
-  <v-container>
-    <div class="form-container">
-      <v-img
-        src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.svg"
-        alt="Vuetify Logo"
-        width="50"
-        class="mx-auto mb-4"
-      />
-      <v-card-title class="text-h5 text-center font-weight-bold mb-6 text-medium-emphasis">
-        Log into your account
-      </v-card-title>
-      <v-card class="elevation-12 pa-4 py-8" :loading="isLoading">
-        <v-card-text>
-          <v-form ref="loginForm" @submit.prevent="loginUser">
-            <v-text-field
-              v-model="userEmail"
-              :rules="[required, isEmail]"
-              label="Email"
-              prepend-inner-icon="mdi-email-outline"
-              type="email"
-              variant="outlined"
-              density="comfortable"
-              class="mb-2"
-            ></v-text-field>
-            <v-text-field
-              v-model="userPassword"
-              :rules="[required]"
-              label="Password"
-              prepend-inner-icon="mdi-lock-outline"
-              type="password"
-              variant="outlined"
-              density="comfortable"
-              class="mb-2"
-            ></v-text-field>
-            <v-alert v-if="errorMessage" variant="outlined" type="error" class="mb-8">
-              {{ errorMessage }}
-            </v-alert>
-            <v-btn block color="primary" size="large" type="submit" class="mt-4"> Log In </v-btn>
-          </v-form>
-        </v-card-text>
-      </v-card>
-    </div>
-  </v-container>
+  <AuthFormCard
+    title="Log in"
+    description="Enter your email and password to access your FitLog account."
+    icon="mdi-login"
+  >
+    <v-form
+      ref="loginForm"
+      :disabled="isLoading"
+      :aria-busy="isLoading"
+      aria-labelledby="auth-page-title"
+      @submit.prevent="loginUser"
+    >
+      <v-text-field
+        v-model="userEmail"
+        :rules="[required, isEmail]"
+        label="Email"
+        name="email"
+        autocomplete="username"
+        prepend-inner-icon="mdi-email-outline"
+        type="email"
+        variant="outlined"
+        density="comfortable"
+        color="primary"
+      ></v-text-field>
+      <v-text-field
+        v-model="userPassword"
+        :rules="[required]"
+        label="Password"
+        name="password"
+        autocomplete="current-password"
+        prepend-inner-icon="mdi-lock-outline"
+        type="password"
+        variant="outlined"
+        density="comfortable"
+        color="primary"
+      ></v-text-field>
+      <v-alert v-if="errorMessage" class="auth-error" variant="tonal" type="error">
+        {{ errorMessage }}
+      </v-alert>
+      <v-btn
+        class="auth-submit"
+        block
+        color="primary"
+        size="large"
+        type="submit"
+        variant="flat"
+        rounded="lg"
+        :loading="isLoading"
+        :disabled="isLoading"
+        >Log in</v-btn
+      >
+    </v-form>
+    <template #footer>
+      <p>Don't have an account? <RouterLink to="/register">Create an account</RouterLink></p>
+    </template>
+  </AuthFormCard>
 </template>
-
-<style scoped>
-.form-container {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-}
-</style>
