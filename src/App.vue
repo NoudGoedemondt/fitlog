@@ -5,6 +5,7 @@ import { useDisplay } from 'vuetify'
 import { supabase } from './plugins/supabase.js'
 import { useAuthStore } from './stores/auth.js'
 import iconFitlog from '@/components/icons/IconFitlog.vue'
+import { getAuthRouteRedirect } from '@/router/authRedirect.js'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -26,11 +27,11 @@ watch([() => route.fullPath, smAndDown], () => {
 })
 
 watch(
-  [() => authStore.isLoading, () => authStore.user, () => route.meta.requiresAuth],
-  ([isLoading, user, requiresAuth]) => {
-    if (!isLoading && !user && requiresAuth) {
-      void router.replace({ name: 'login' })
-    }
+  [() => authStore.isLoading, () => authStore.user, () => route.fullPath],
+  ([isLoading, user]) => {
+    if (isLoading) return
+    const redirect = getAuthRouteRedirect(router, route, user)
+    if (redirect) void router.replace(redirect)
   },
   { immediate: true },
 )

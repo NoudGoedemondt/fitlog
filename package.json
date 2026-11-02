@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "test": "node --test",
     "lint:check": "run-s lint:oxlint:check lint:eslint:check",
     "lint:oxlint:check": "oxlint .",
     "lint:eslint:check": "eslint .",

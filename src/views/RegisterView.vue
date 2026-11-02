@@ -1,11 +1,13 @@
 <script setup>
 import { supabase } from '../plugins/supabase.js'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { required, isEmail, matchOther, minLength } from '../utils/validationRules.js'
 import AuthFormCard from '@/components/AuthFormCard.vue'
+import { getAuthRedirect } from '@/router/authRedirect.js'
 
 const router = useRouter()
+const route = useRoute()
 const userName = ref('')
 const userEmail1 = ref('')
 const userEmail2 = ref('')
@@ -19,6 +21,9 @@ const registerForm = ref(null)
 
 const registerUser = async () => {
   if (isLoading.value || !registerForm.value) return
+  // Capture the destination before auth changes can trigger the app watcher.
+  const destination = getAuthRedirect(router, route.query.redirect)
+  const loginLocation = { name: 'login', query: { redirect: route.query.redirect } }
   isLoading.value = true
   errorMessage.value = ''
 
@@ -26,7 +31,7 @@ const registerUser = async () => {
     const { valid } = await registerForm.value.validate()
     if (!valid) return
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: userEmail2.value,
       password: userPassword2.value,
       options: { data: { username: userName.value } },
@@ -35,7 +40,7 @@ const registerUser = async () => {
       errorMessage.value = error.message
       return
     }
-    await router.push('/')
+    await router.replace(data.session ? destination : loginLocation)
   } catch (error) {
     errorMessage.value = error?.message || 'Unable to create your account. Please try again.'
   } finally {
@@ -168,7 +173,12 @@ const registerUser = async () => {
       >
     </v-form>
     <template #footer>
-      <p>Already have an account? <RouterLink to="/login">Log in</RouterLink></p>
+      <p>
+        Already have an account?
+        <RouterLink :to="{ name: 'login', query: { redirect: route.query.redirect } }"
+          >Log in</RouterLink
+        >
+      </p>
     </template>
   </AuthFormCard>
 </template>

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
 import { watch } from 'vue'
+import { getAuthRouteRedirect } from './authRedirect.js'
 
 /**
  * Waits for authStore's initial session check to finish.
@@ -39,11 +40,13 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue'),
+      meta: { guestOnly: true },
     },
     {
       path: '/register',
       name: 'register',
       component: () => import('../views/RegisterView.vue'),
+      meta: { guestOnly: true },
     },
     {
       path: '/body-profile',
@@ -82,9 +85,7 @@ router.beforeEach(async (to, _from) => {
   const authStore = useAuthStore()
   await waitForAuthReady(authStore)
 
-  if (to.meta?.requiresAuth && !authStore.user) {
-    return { name: 'login' }
-  }
+  return getAuthRouteRedirect(router, to, authStore.user)
 })
 
 export default router

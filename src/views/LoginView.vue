@@ -1,11 +1,13 @@
 <script setup>
 import { supabase } from '../plugins/supabase.js'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { required, isEmail } from '../utils/validationRules.js'
 import AuthFormCard from '@/components/AuthFormCard.vue'
+import { getAuthRedirect } from '@/router/authRedirect.js'
 
 const router = useRouter()
+const route = useRoute()
 const userEmail = ref('')
 const userPassword = ref('')
 const showPassword = ref(false)
@@ -15,6 +17,8 @@ const loginForm = ref(null)
 
 const loginUser = async () => {
   if (isLoading.value || !loginForm.value) return
+  // Capture the destination before auth changes can trigger the app watcher.
+  const destination = getAuthRedirect(router, route.query.redirect)
   isLoading.value = true
   errorMessage.value = ''
 
@@ -30,7 +34,7 @@ const loginUser = async () => {
       errorMessage.value = error.message
       return
     }
-    await router.push('/')
+    await router.replace(destination)
   } catch (error) {
     errorMessage.value = error?.message || 'Unable to log in. Please try again.'
   } finally {
@@ -108,7 +112,12 @@ const loginUser = async () => {
       >
     </v-form>
     <template #footer>
-      <p>Don't have an account? <RouterLink to="/register">Create an account</RouterLink></p>
+      <p>
+        Don't have an account?
+        <RouterLink :to="{ name: 'register', query: { redirect: route.query.redirect } }"
+          >Create an account</RouterLink
+        >
+      </p>
     </template>
   </AuthFormCard>
 </template>
