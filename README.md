@@ -25,6 +25,11 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 npm install
 ```
 
+If `.env` does not exist, copy `.env.example` to `.env` and set
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for your development Supabase
+project. Keep an existing `.env` unchanged. Environment files are ignored by Git;
+only the placeholder example belongs in the repository.
+
 ### Compile and Hot-Reload for Development
 
 ```sh
@@ -37,11 +42,40 @@ npm run dev
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+### Validate code and formatting
 
 ```sh
-npm run lint
+npm run lint:check
+npm run format:check
 ```
+
+## Vercel deployment
+
+Import this repository into Vercel with the repository root as the Root Directory:
+
+- Framework Preset: **Vite**.
+- Build Command: `npm run build`.
+- Output Directory: `dist`.
+- Install Command: `npm ci` (uses the committed `package-lock.json`).
+- Node.js version: **24.x**, compatible with `package.json`.
+
+Before building, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the
+Vercel project's Environment Variables for each intended environment (Production
+and, if used, Preview). Use the public anon key for the selected Supabase project.
+Vite embeds `VITE_*` values in the browser bundle: never use a service-role key,
+secret key, or database password here. Changes to these variables require a new build.
+Keep local development values in your ignored `.env` file.
+
+The router uses `createWebHistory`. `vercel.json` rewrites application paths to
+`/index.html` so opening or refreshing routes such as `/weight-logs`,
+`/auth/confirm`, and `/reset-password` loads the Vue application.
+See [Vercel's Vite deployment documentation](https://vercel.com/docs/frameworks/frontend/vite).
+
+Before testing hosted email confirmation or password recovery, review the
+**Hosted Supabase** and **Password recovery** sections below for the Site URL and
+allowed callback URLs. Preparing this repository does not change those settings
+or deploy the application. After deployment, verify direct navigation and refresh
+on nested routes, login, email confirmation, and password recovery on the actual host.
 
 ## Email verification
 
