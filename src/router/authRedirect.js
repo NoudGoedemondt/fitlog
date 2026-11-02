@@ -1,4 +1,4 @@
-// Only registered, internal, non-guest routes may be used as return destinations.
+// Only registered, internal content routes may be used as return destinations.
 export function getAuthRedirect(router, value) {
   const fallback = { name: 'home' }
   if (
@@ -15,7 +15,10 @@ export function getAuthRedirect(router, value) {
 
   try {
     const target = router.resolve(value)
-    if (!target.matched.length || target.matched.some((record) => record.meta.guestOnly)) {
+    if (
+      !target.matched.length ||
+      target.matched.some((record) => record.meta.guestOnly || record.meta.authCallback)
+    ) {
       return fallback
     }
     return { path: target.path, query: target.query, hash: target.hash }

@@ -5,6 +5,7 @@ import { ref } from 'vue'
 import { required, isEmail, matchOther, minLength } from '../utils/validationRules.js'
 import AuthFormCard from '@/components/AuthFormCard.vue'
 import { getAuthRedirect } from '@/router/authRedirect.js'
+import { getEmailConfirmationUrl } from '@/utils/emailVerification.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -23,7 +24,8 @@ const registerUser = async () => {
   if (isLoading.value || !registerForm.value) return
   // Capture the destination before auth changes can trigger the app watcher.
   const destination = getAuthRedirect(router, route.query.redirect)
-  const loginLocation = { name: 'login', query: { redirect: route.query.redirect } }
+  const returnPath = router.resolve(destination).fullPath
+  const emailRedirectTo = getEmailConfirmationUrl(router, returnPath, window.location.origin)
   isLoading.value = true
   errorMessage.value = ''
 
@@ -34,13 +36,21 @@ const registerUser = async () => {
     const { data, error } = await supabase.auth.signUp({
       email: userEmail2.value,
       password: userPassword2.value,
-      options: { data: { username: userName.value } },
+      options: { data: { username: userName.value }, emailRedirectTo },
     })
     if (error) {
       errorMessage.value = error.message
       return
     }
-    await router.replace(data.session ? destination : loginLocation)
+    await router.replace(
+      data.session
+        ? destination
+        : {
+            name: 'verify-email',
+            query: { redirect: returnPath },
+            state: { verificationEmail: userEmail2.value, verificationSentAt: Date.now() },
+          },
+    )
   } catch (error) {
     errorMessage.value = error?.message || 'Unable to create your account. Please try again.'
   } finally {

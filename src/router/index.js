@@ -49,6 +49,18 @@ const router = createRouter({
       meta: { guestOnly: true },
     },
     {
+      path: '/verify-email',
+      name: 'verify-email',
+      component: () => import('../views/VerifyEmailView.vue'),
+      meta: { guestOnly: true },
+    },
+    {
+      path: '/auth/confirm',
+      name: 'auth-confirm',
+      component: () => import('../views/AuthConfirmView.vue'),
+      meta: { authCallback: true },
+    },
+    {
       path: '/body-profile',
       name: 'body-profile',
       component: () => import('../views/BodyProfileView.vue'),

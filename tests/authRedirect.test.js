@@ -12,6 +12,8 @@ const createTestRouter = (user = null) => {
       { path: '/', name: 'home', component },
       { path: '/login', name: 'login', component, meta: { guestOnly: true } },
       { path: '/register', name: 'register', component, meta: { guestOnly: true } },
+      { path: '/verify-email', name: 'verify-email', component, meta: { guestOnly: true } },
+      { path: '/auth/confirm', name: 'auth-confirm', component, meta: { authCallback: true } },
       { path: '/weight-logs', name: 'weight-logs', component, meta: { requiresAuth: true } },
     ],
   })
@@ -48,7 +50,7 @@ test('preserves the return destination when switching between login and registra
 
 test('signed-in users cannot stay on login or registration', async () => {
   const { router } = createTestRouter({ id: 'test-user' })
-  for (const name of ['login', 'register']) {
+  for (const name of ['login', 'register', 'verify-email']) {
     await router.push({ name })
     assert.equal(router.currentRoute.value.name, 'home')
     await router.push({ name, query: { redirect: '/weight-logs?period=month#history' } })
@@ -80,6 +82,9 @@ test('rejects external, malformed, repeated and guest-only return destinations',
     '/weight-logs\n',
     '/login',
     '/register?redirect=/login',
+    '/verify-email',
+    '/auth/confirm',
+    '/auth/confirm?redirect=/login#provider-parameters',
   ]
   for (const value of invalid) {
     assert.deepEqual(getAuthRedirect(router, value), { name: 'home' })
@@ -109,4 +114,10 @@ test('public routes remain accessible to both guests and signed-in users', async
     assert.equal(router.currentRoute.value.name, 'home')
     assert.equal(getAuthRouteRedirect(router, router.currentRoute.value, user), undefined)
   }
+})
+
+test('the confirmation callback remains accessible even with an existing session', async () => {
+  const { router } = createTestRouter({ id: 'test-user' })
+  await router.push('/auth/confirm?redirect=/weight-logs#error=access_denied')
+  assert.equal(router.currentRoute.value.name, 'auth-confirm')
 })

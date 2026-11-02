@@ -19,6 +19,7 @@ const loginUser = async () => {
   if (isLoading.value || !loginForm.value) return
   // Capture the destination before auth changes can trigger the app watcher.
   const destination = getAuthRedirect(router, route.query.redirect)
+  const returnPath = router.resolve(destination).fullPath
   isLoading.value = true
   errorMessage.value = ''
 
@@ -30,6 +31,14 @@ const loginUser = async () => {
       email: userEmail.value,
       password: userPassword.value,
     })
+    if (error?.code === 'email_not_confirmed') {
+      await router.replace({
+        name: 'verify-email',
+        query: { redirect: returnPath },
+        state: { verificationEmail: userEmail.value },
+      })
+      return
+    }
     if (error) {
       errorMessage.value = error.message
       return
