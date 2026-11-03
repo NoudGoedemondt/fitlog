@@ -1,138 +1,91 @@
 # FitLog — Agent Instructions
 
-## Project Overview
+## Project
 
-FitLog is a fitness-tracking application built with Vue 3, Vite, Vuetify, Pinia, Vue Router, and Supabase.
+FitLog is a fitness-tracking application built with Vue 3, Vite, Vuetify, Pinia, Vue Router, and Supabase, with frontend hosting and deployment on Vercel.
 
-The goal is to build a reliable, secure, understandable, and maintainable application while supporting the developer's growth in software engineering.
+The goal is to build reliable, secure, and maintainable software while supporting the developer's growth in software engineering.
 
-## Collaboration Principles
+The developer owns consequential engineering decisions; AI handles routine implementation.
 
-The developer owns important engineering decisions. AI agents assist with design and may perform most implementation work.
+## Engineering Rules
 
-- Communicate explanations and reviews in Dutch.
-- Write code, identifiers, and code comments in English.
-- Prioritize simple, readable, maintainable solutions.
-- Follow existing project conventions unless there is a justified reason to deviate.
-- Prefer focused changes over unrelated refactoring.
-- Explain relevant trade-offs without overwhelming the developer with trivial implementation details.
+- Communicate explanations, design discussions, and reviews in Dutch. Write code, identifiers, and code comments in English.
+- Inspect relevant existing code before making changes.
+- Follow existing conventions and architectural boundaries.
+- Prefer simple, maintainable solutions and focused changes over unnecessary abstractions or refactoring.
+- Do not introduce TypeScript or new dependencies without approval.
+- Implement routine, low-risk tasks independently.
+- Before consequential architecture, security, authentication, authorization, or data-model decisions, explain the recommended approach and obtain developer approval.
+- Treat an explicitly approved implementation plan as authorization to implement its agreed scope.
+- If new consequential decisions or significant risks emerge, discuss them before proceeding.
+- Do not perform unrelated changes without approval.
 
-## Development Workflow
+## Environments and Deployment
 
-Adapt the workflow to the complexity and risk of the task.
+### Development
 
-### 1. Understand
+- Frontend: Vue 3 + Vite, running locally.
+- Database: Supabase `FitlogDB-test` (`yfupaojunwlqjnthxrlc`).
+- Local environment variables are stored in `.env` and must not be committed.
+- Use the development database for feature development and testing.
+- Treat the remote development database as persistent; do not reset or destroy it without explicit approval.
 
-Before modifying code:
+### Production
 
-- Inspect the relevant existing implementation and dependencies.
-- Identify affected components, composables, stores, database objects, and interfaces.
-- Distinguish confirmed behavior from assumptions.
-- Clarify material uncertainties before making consequential decisions.
+- Frontend: Hosted on Vercel, deployed from the `main` branch.
+- Database: Supabase `FitlogDB-prod` (`uxmvhvtsthukvicjajdw`).
+- Production environment variables are configured in Vercel.
+- Production contains real user data and must be treated as non-disposable.
 
-Do not require extensive investigation for trivial changes.
+### Git and Deployment
 
-### 2. Design
+- Prefer feature branches and small, reviewable commits.
+- Do not push directly to `main` or merge pull requests without explicit developer approval.
+- Changes merged into `main` may automatically trigger a Vercel production deployment.
+- Frontend deployments and database migrations are separate operations.
+- Do not assume merging code automatically applies database migrations.
+- Consider frontend/database schema compatibility when planning releases.
+- Vercel preview deployments must not unintentionally connect to the production database.
 
-For non-trivial changes:
+### Database Safety
 
-- Explain the proposed approach.
-- Present meaningful alternatives and their trade-offs where appropriate.
-- Identify architectural, data-integrity, security, and maintainability implications.
-- Propose a focused implementation and validation plan.
-
-Obtain developer approval before implementing consequential design decisions.
-
-### 3. Implement
-
-Once the approach is agreed upon:
-
-- Perform the implementation without requiring the developer to manually write routine code.
-- Preserve established patterns and public interfaces unless changes are explicitly approved.
-- Avoid unnecessary dependencies and abstractions.
-- Keep changes small enough to review meaningfully.
-- Do not perform unrelated cleanup without approval.
-
-Routine, low-risk, clearly scoped changes may be implemented directly.
-
-### 4. Review and Validate
-
-After implementation:
-
-- Review the resulting diff for unintended changes.
-- Run relevant available checks and tests.
-- During read-only tasks, only run non-mutating verification commands.
-- Describe what changed and why.
-- Report which checks actually ran and their results.
-- Explicitly identify unverified behavior and remaining risks.
-
-Never claim that code was tested if the tests were not executed.
-
-## Decision Boundaries
-
-Obtain explicit developer approval before making or changing
-consequential decisions involving:
-
-- Database schemas, relationships, constraints, or migrations.
-- Authentication, authorization, or Row Level Security policies.
-- Significant architectural changes or new dependencies.
-- API contracts, major state-management patterns, or data ownership.
-- Destructive operations or changes risking data loss.
-- Deployments or production infrastructure changes.
-
-Decisions explicitly approved in the current task do not
-require renewed approval unless new risks or design choices emerge.
-
-## Security and Data Safety
-
-- Never expose or commit credentials, tokens, or private environment values.
-- Never modify production data without explicit approval.
-- Treat database migrations and RLS changes as high-risk operations.
-- Prefer development or test environments for database verification.
-- Do not bypass security controls for implementation convenience.
+- Never run production migrations, resets, destructive SQL, or data modifications without explicit developer approval.
+- Never reset a remote Supabase database, including development, without explicit approval.
+- Always verify the target Supabase project before executing remote database commands.
+- Do not infer the Supabase CLI target from frontend environment variables.
+- Create schema changes as version-controlled SQL migrations in `supabase/migrations/`.
+- Validate migrations in development before proposing production deployment.
+- Prefer read-only inspection and dry-run commands when available.
+- Before production database changes, explain the target, intended commands, expected impact, and rollback considerations.
 - Do not weaken existing authorization or data-isolation guarantees.
 
-## Code Organization
+### Secrets
 
-- Keep presentation concerns in Vue components.
-- Preserve existing responsibilities of composables, stores, and shared utilities.
-- Avoid unnecessary duplication of business logic.
-- Do not move logic between architectural layers without explaining the rationale.
-- Keep asynchronous operations, loading states, and error handling consistent and explicit.
-- Follow existing JavaScript conventions; do not introduce TypeScript without approval.
+- Never commit `.env` files, passwords, tokens, secret keys, or service-role keys.
+- Never expose secrets in logs, commits, or completion reports.
 
-These are guidelines, not justification for large refactors.
+## Testing and Verification
 
-## Verification
-
-After implementing changes:
-
-- Run relevant available validation commands.
-- Prefer non-mutating checks such as `npm run lint:check`.
-- Run `npm run build` when appropriate.
-- Report executed checks, failures, and limitations.
-
-## Learning and Code Review
-
-Optimize for engineering understanding rather than manual code production.
-
-When reviewing meaningful changes, explain:
-
-- Why the solution fits the existing architecture.
-- Which important decisions were made.
-- What alternatives or trade-offs matter.
-- How correctness can be verified.
-- What limitations or risks remain.
-
-Focus on concepts, responsibilities, and reasoning rather than explaining every line of boilerplate.
+- Add or update automated tests for new features, bug fixes, and changed behavior when they provide meaningful regression protection.
+- Prioritize business logic, data validation, authentication, authorization, and error handling.
+- Design new logic to be testable without introducing unnecessary abstractions solely for testing.
+- Follow existing testing tools and conventions; do not introduce a new testing framework without approval.
+- Prefer tests that verify observable behavior over implementation details.
+- Run relevant tests and checks before completing a task.
+- Use `npm run lint:check`, `npm run format:check`, and `npm run build` when appropriate.
+- Review the resulting diff for unintended changes.
+- If tests are not added or cannot be executed, explain why and identify remaining verification gaps.
+- Do not fix unrelated pre-existing failures without approval.
+- Never claim tests or checks passed unless they were actually executed.
 
 ## Completion Report
 
-For non-trivial implementation tasks, conclude with:
+After completing a task, provide a concise report covering:
 
-- Changes made.
-- Reasoning behind significant decisions.
-- Validation performed and results.
-- Remaining risks or follow-up work.
+- **Changes:** What behavior changed and which relevant files were modified.
+- **Decisions:** Important implementation choices, assumptions, and deviations from the agreed plan.
+- **Verification:** Commands executed, test and build results, and acceptance criteria status when defined.
+- **Remaining concerns:** Known limitations, unverified behavior, and remaining risks.
 
-Keep reports concise and proportional to the task.
+Keep reports proportional to the task. Omit irrelevant details, but never omit failed checks or significant risks.
