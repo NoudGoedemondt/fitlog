@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
+import { parseWeight } from '@/utils/weightFormatting.js'
 import {
   splitMeasuredAt,
   combineToMeasuredAt,
@@ -31,6 +32,7 @@ const formDate = computed(() =>
   dateInputText.value === null ? formModel.value.date : parseDateInput(dateInputText.value),
 )
 const dateRule = () => validDate(formDate.value)
+const weightRule = (value) => positiveNumber(parseWeight(value))
 
 watch(
   [isOpen, () => props.entry],
@@ -67,7 +69,7 @@ const submit = async () => {
       validationError.value = 'Enter a valid date and time.'
       return
     }
-    emit('save', { weight_kg: formModel.value.weight_kg, measured_at: measuredAt })
+    emit('save', { weight_kg: parseWeight(formModel.value.weight_kg), measured_at: measuredAt })
   } catch (error) {
     validationError.value =
       error?.message || 'Unable to validate the measurement. Please try again.'
@@ -139,15 +141,15 @@ const submit = async () => {
             ></v-number-input>
           </div>
 
-          <v-number-input
+          <v-text-field
             v-model="formModel.weight_kg"
-            :precision="2"
-            :min="0"
+            type="text"
+            inputmode="decimal"
             label="Weight (kg)"
             variant="outlined"
             color="primary"
-            :rules="[required, positiveNumber]"
-          ></v-number-input>
+            :rules="[required, weightRule]"
+          ></v-text-field>
         </v-form>
       </v-card-text>
 
