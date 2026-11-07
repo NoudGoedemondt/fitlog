@@ -62,6 +62,14 @@ const updateOpen = (open) => {
   if (!isBusy.value) isOpen.value = open
 }
 
+const updateDate = (date) => {
+  if (date?.toDateString() !== formModel.value.date?.toDateString()) {
+    formModel.value.hour = null
+    formModel.value.minute = null
+  }
+  formModel.value.date = date
+}
+
 const submit = async () => {
   if (isBusy.value || !weightEntryForm.value) return
   isValidating.value = true
@@ -110,9 +118,15 @@ const submit = async () => {
         <v-alert v-if="validationError || error" type="error" variant="tonal" class="mb-4">
           {{ validationError || error }}
         </v-alert>
-        <v-form ref="weightEntryForm" :disabled="isBusy" @submit.prevent="submit">
+        <v-form
+          ref="weightEntryForm"
+          validate-on="blur"
+          :disabled="isBusy"
+          @submit.prevent="submit"
+        >
           <v-date-input
-            v-model="formModel.date"
+            :model-value="formModel.date"
+            @update:model-value="updateDate"
             input-format="dd-mm-yyyy"
             label="Date"
             variant="outlined"
