@@ -1,16 +1,30 @@
 <script setup>
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { onMounted, computed, ref, watch } from 'vue'
-import { useDisplay } from 'vuetify'
+import { useDisplay, useTheme } from 'vuetify'
 import { supabase } from './plugins/supabase.js'
 import { useAuthStore } from './stores/auth.js'
 import iconFitlog from '@/components/icons/IconFitlog.vue'
 import { getAuthRouteRedirect } from '@/router/authRedirect.js'
+import { saveThemePreference } from '@/utils/themePreference.js'
 
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const { smAndDown } = useDisplay()
+const theme = useTheme()
+const themeOptions = [
+  { title: 'Light', value: 'light', icon: 'mdi-weather-sunny' },
+  { title: 'Dark', value: 'dark', icon: 'mdi-weather-night' },
+  { title: 'System', value: 'system', icon: 'mdi-theme-light-dark' },
+]
+const themePreference = computed(() => (theme.isSystem.value ? 'system' : theme.name.value))
+
+const selectTheme = (preference) => {
+  void theme.change(preference)
+  saveThemePreference(preference)
+}
+
 const mobileNavigationIsOpen = ref(false)
 const navigationItems = [
   { title: 'Workouts', to: '/workouts', icon: 'mdi-dumbbell' },
@@ -135,6 +149,21 @@ onMounted(async () => {
                   prepend-icon="mdi-logout"
                   title="Log out"
                   @click="handleLogout"
+                ></v-list-item>
+                <v-divider v-if="showSignedOutButtons || showSignedInButtons" class="my-2" />
+                <v-list-subheader>Theme</v-list-subheader>
+                <v-list-item
+                  v-for="option in themeOptions"
+                  :key="option.value"
+                  :title="option.title"
+                  :prepend-icon="option.icon"
+                  :append-icon="themePreference === option.value ? 'mdi-check' : undefined"
+                  :active="themePreference === option.value"
+                  :aria-label="`${option.title} theme`"
+                  :aria-pressed="themePreference === option.value"
+                  role="button"
+                  color="primary"
+                  @click="selectTheme(option.value)"
                 ></v-list-item>
               </v-list>
             </v-menu>

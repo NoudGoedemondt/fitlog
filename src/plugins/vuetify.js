@@ -2,6 +2,7 @@ import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
 import { md3 } from 'vuetify/blueprints'
+import { readThemePreference } from '@/utils/themePreference.js'
 
 export default createVuetify({
   blueprint: md3,
@@ -9,7 +10,7 @@ export default createVuetify({
     defaultSet: 'mdi',
   },
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: readThemePreference(),
     themes: {
       light: {
         dark: false,
