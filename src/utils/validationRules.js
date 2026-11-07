@@ -10,6 +10,8 @@ export const minLength = (length) => (v) =>
 
 export const positiveNumber = (v) => v > 0 || 'Value must be greater than 0.'
 
+export const validWeight = (v) => Number.isFinite(v) || 'Enter a valid weight.'
+
 export const validDate = (v) =>
   (v instanceof Date &&
     Number.isFinite(v.getTime()) &&
