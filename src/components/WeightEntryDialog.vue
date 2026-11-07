@@ -9,6 +9,7 @@ import {
 import {
   required,
   positiveNumber,
+  validWeight,
   validDate,
   validHour,
   validMinute,
@@ -36,7 +37,11 @@ const formDate = computed(() =>
   dateInputText.value === null ? formModel.value.date : parseDateInput(dateInputText.value),
 )
 const dateRule = () => validDate(formDate.value)
-const weightRule = (value) => positiveNumber(parseWeight(value))
+const weightRule = (value) => {
+  const weight = parseWeight(value)
+  const result = validWeight(weight)
+  return result === true ? positiveNumber(weight) : result
+}
 
 watch(
   [isOpen, () => props.entry],
