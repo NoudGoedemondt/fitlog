@@ -164,6 +164,21 @@ onMounted(async () => {
           @click="mobileNavigationIsOpen = false"
         ></v-btn>
       </div>
+      <div v-if="showSignedOutButtons" class="mobile-navigation-sign-in">
+        <p id="mobile-navigation-sign-in-description">
+          Log in to access your workouts, routines and other modules.
+        </p>
+        <v-btn
+          to="/login"
+          color="primary"
+          variant="flat"
+          rounded="lg"
+          block
+          @click="mobileNavigationIsOpen = false"
+        >
+          Log in
+        </v-btn>
+      </div>
       <v-list class="mobile-navigation-list" nav>
         <v-list-item
           v-for="item in navigationItems"
@@ -171,6 +186,11 @@ onMounted(async () => {
           :to="item.to"
           :title="item.title"
           :prepend-icon="item.icon"
+          :append-icon="showSignedOutButtons ? 'mdi-lock-outline' : undefined"
+          :class="{ 'mobile-navigation-item-locked': showSignedOutButtons }"
+          :aria-describedby="
+            showSignedOutButtons ? 'mobile-navigation-sign-in-description' : undefined
+          "
           :disabled="navigationIsDisabled"
           :active="route.path === item.to"
           color="primary"
@@ -321,6 +341,25 @@ onMounted(async () => {
 
 .mobile-navigation-list {
   padding: 8px 16px;
+}
+
+.mobile-navigation-sign-in {
+  margin: 4px 16px 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgb(var(--v-theme-surface-accent));
+}
+
+.mobile-navigation-sign-in p {
+  margin-bottom: 12px;
+  color: rgb(var(--v-theme-on-surface));
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.mobile-navigation-list :deep(.mobile-navigation-item-locked) {
+  color: rgb(var(--v-theme-on-surface-variant));
+  opacity: 1;
 }
 
 .mobile-navigation-list :deep(.v-list-item) {
