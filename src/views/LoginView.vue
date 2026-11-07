@@ -60,6 +60,7 @@ const loginUser = async () => {
   >
     <v-form
       ref="loginForm"
+      validate-on="blur"
       :disabled="isLoading"
       :aria-busy="isLoading"
       aria-labelledby="auth-page-title"

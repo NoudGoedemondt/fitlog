@@ -101,6 +101,7 @@ const resendEmail = async () => {
   >
     <v-form
       ref="verificationForm"
+      validate-on="blur"
       :disabled="isResending"
       :aria-busy="isResending"
       aria-labelledby="auth-page-title"

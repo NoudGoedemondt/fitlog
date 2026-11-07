@@ -67,6 +67,7 @@ const registerUser = async () => {
   >
     <v-form
       ref="registerForm"
+      validate-on="blur"
       :disabled="isLoading"
       :aria-busy="isLoading"
       aria-labelledby="auth-page-title"

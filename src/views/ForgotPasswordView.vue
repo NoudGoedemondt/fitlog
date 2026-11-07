@@ -88,6 +88,7 @@ const sendResetEmail = async () => {
   >
     <v-form
       ref="recoveryForm"
+      validate-on="blur"
       :disabled="isSending"
       :aria-busy="isSending"
       aria-labelledby="auth-page-title"

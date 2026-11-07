@@ -98,6 +98,7 @@ const savePassword = async () => {
       <v-form
         v-if="userId"
         ref="resetForm"
+        validate-on="blur"
         :disabled="isSaving"
         :aria-busy="isSaving"
         aria-labelledby="auth-page-title"
