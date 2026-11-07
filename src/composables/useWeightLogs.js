@@ -40,7 +40,7 @@ export function useWeightLogs() {
     weight_kg: weightKg,
     measured_at: measuredAt,
   }) => {
-    if (isMutationLoading.value) return
+    if (isMutationLoading.value) return false
     isMutationLoading.value = true
     mutationError.value = null
 
@@ -54,15 +54,17 @@ export function useWeightLogs() {
       if (error) throw error
       weightEntries.value.push(data)
       sortDescending(weightEntries.value)
+      return true
     } catch (error) {
       mutationError.value = errorMessage(error, 'Unable to add the weight entry. Please try again.')
+      return false
     } finally {
       isMutationLoading.value = false
     }
   }
 
   const updateWeightEntry = async (id, { weight_kg: weightKg, measured_at: measuredAt }) => {
-    if (isMutationLoading.value) return
+    if (isMutationLoading.value) return false
     isMutationLoading.value = true
     mutationError.value = null
 
@@ -78,18 +80,20 @@ export function useWeightLogs() {
       const index = weightEntries.value.findIndex((entry) => entry.id === id)
       if (index !== -1) weightEntries.value[index] = data
       sortDescending(weightEntries.value)
+      return true
     } catch (error) {
       mutationError.value = errorMessage(
         error,
         'Unable to update the weight entry. Please try again.',
       )
+      return false
     } finally {
       isMutationLoading.value = false
     }
   }
 
   const deleteWeightEntry = async (id) => {
-    if (isMutationLoading.value) return
+    if (isMutationLoading.value) return false
     isMutationLoading.value = true
     mutationError.value = null
 
@@ -103,11 +107,13 @@ export function useWeightLogs() {
 
       if (error) throw error
       weightEntries.value = weightEntries.value.filter((entry) => entry.id !== id)
+      return true
     } catch (error) {
       mutationError.value = errorMessage(
         error,
         'Unable to delete the weight entry. Please try again.',
       )
+      return false
     } finally {
       isMutationLoading.value = false
     }

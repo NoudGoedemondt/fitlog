@@ -15,8 +15,7 @@ const dialogIsOpen = ref(false)
 const editingEntry = ref(null)
 const deletingItemId = ref(null)
 const formError = ref(null)
-const isSaving = ref(false)
-const isBusy = computed(() => isSaving.value || weightLogs.isMutationLoading.value)
+const isBusy = weightLogs.isMutationLoading
 const latestEntry = computed(() => weightLogs.weightEntries.value[0] ?? null)
 const entryToDelete = computed(
   () => weightLogs.weightEntries.value.find((entry) => entry.id === deletingItemId.value) ?? null,
@@ -56,34 +55,28 @@ const edit = (id) => {
 
 const save = async (values) => {
   if (isBusy.value) return
-  isSaving.value = true
   formError.value = null
   weightLogs.mutationError.value = null
-  try {
-    if (!authStore.user) {
-      formError.value = 'Please log in again before saving a weight entry.'
-      return
-    }
-    if (dialogTarget.value === 'new') {
-      await weightLogs.createWeightEntry({ user_id: authStore.user.id, ...values })
-    } else if (typeof dialogTarget.value === 'number') {
-      await weightLogs.updateWeightEntry(dialogTarget.value, values)
-    } else {
-      formError.value = 'Reopen the weight entry before saving.'
-      return
-    }
-    if (!weightLogs.mutationError.value) dialogIsOpen.value = false
-  } catch (error) {
-    formError.value = error?.message || 'Unable to save the weight entry. Please try again.'
-  } finally {
-    isSaving.value = false
+  if (!authStore.user) {
+    formError.value = 'Please log in again before saving a weight entry.'
+    return
   }
+  let success
+  if (dialogTarget.value === 'new') {
+    success = await weightLogs.createWeightEntry({ user_id: authStore.user.id, ...values })
+  } else if (typeof dialogTarget.value === 'number') {
+    success = await weightLogs.updateWeightEntry(dialogTarget.value, values)
+  } else {
+    formError.value = 'Reopen the weight entry before saving.'
+    return
+  }
+  if (success) dialogIsOpen.value = false
 }
 
 const remove = async (id) => {
   if (isBusy.value) return
-  await weightLogs.deleteWeightEntry(id)
-  if (!weightLogs.mutationError.value) deletingItemId.value = null
+  const success = await weightLogs.deleteWeightEntry(id)
+  if (success) deletingItemId.value = null
 }
 
 const toggleRemove = (id) => {
