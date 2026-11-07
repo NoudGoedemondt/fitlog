@@ -21,7 +21,11 @@ const props = defineProps({
   error: { type: String, default: null },
 })
 const emit = defineEmits(['save', 'after-leave'])
-const formModel = ref({ weight_kg: 0, date: new Date(), hour: null, minute: null })
+const createNewEntry = () => {
+  const now = new Date()
+  return { weight_kg: null, date: now, hour: now.getHours(), minute: now.getMinutes() }
+}
+const formModel = ref(createNewEntry())
 const weightEntryForm = ref(null)
 // VDateInput can retain or normalize its model when typed input is invalid.
 const dateInputText = ref(null)
@@ -40,7 +44,7 @@ watch(
     if (!open) return
     formModel.value = props.entry
       ? { weight_kg: props.entry.weight_kg, ...splitMeasuredAt(props.entry.measured_at) }
-      : { weight_kg: 0, date: new Date(), hour: null, minute: null }
+      : createNewEntry()
     dateInputText.value = null
     validationError.value = null
     await nextTick()
