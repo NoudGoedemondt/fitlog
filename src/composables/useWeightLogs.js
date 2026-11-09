@@ -1,12 +1,6 @@
 import { ref } from 'vue'
 import { supabase } from '../plugins/supabase'
-
-// Mutates the entries array in place.
-const sortDescending = (entries) => {
-  entries.sort((a, b) => new Date(b.measured_at) - new Date(a.measured_at))
-}
-
-const errorMessage = (error, fallback) => error?.message || fallback
+import { sortDescending, errorMessage } from '../utils/composableHelpers.js'
 
 export function useWeightLogs() {
   const weightEntries = ref([])
@@ -53,7 +47,7 @@ export function useWeightLogs() {
 
       if (error) throw error
       weightEntries.value.push(data)
-      sortDescending(weightEntries.value)
+      sortDescending(weightEntries.value, 'measured_at')
       return true
     } catch (error) {
       mutationError.value = errorMessage(error, 'Unable to add the weight entry. Please try again.')
@@ -79,7 +73,7 @@ export function useWeightLogs() {
       if (error) throw error
       const index = weightEntries.value.findIndex((entry) => entry.id === id)
       if (index !== -1) weightEntries.value[index] = data
-      sortDescending(weightEntries.value)
+      sortDescending(weightEntries.value, 'measured_at')
       return true
     } catch (error) {
       mutationError.value = errorMessage(
