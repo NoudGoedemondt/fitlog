@@ -6,6 +6,7 @@ import { formatWeight } from '@/utils/weightFormatting.js'
 import { useAuthStore } from '@/stores/auth.js'
 import WeightMeasurementFormDialog from '@/components/WeightMeasurementFormDialog.vue'
 import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
+import LatestWeightMeasurement from '@/components/LatestWeightMeasurement.vue'
 import WeightHistoryTable from '@/components/WeightHistoryTable.vue'
 
 const authStore = useAuthStore()
@@ -108,35 +109,11 @@ onMounted(reload)
     </v-alert>
 
     <div class="journal-overview">
-      <div class="latest-measurement" :aria-busy="weightLogs.isFetchLoading.value">
-        <div class="summary-label"><span class="status-dot"></span> LATEST MEASUREMENT</div>
-        <v-skeleton-loader
-          v-if="weightLogs.isFetchLoading.value && !latestEntry"
-          type="heading"
-          color="transparent"
-        ></v-skeleton-loader>
-        <div v-else class="latest-weight">
-          {{ latestEntry ? formatWeight(latestEntry.weight_kg) : '—' }}<span>kg</span>
-        </div>
-        <div class="latest-date">
-          <v-icon icon="mdi-clock-outline" size="16"></v-icon>
-          {{
-            latestEntry
-              ? formatMeasuredAt(latestEntry.measured_at)
-              : weightLogs.isFetchLoading.value
-                ? 'Loading measurements…'
-                : weightLogs.fetchError.value
-                  ? 'Measurement unavailable'
-                  : 'No measurements recorded'
-          }}
-        </div>
-        <v-icon
-          class="summary-watermark"
-          icon="mdi-scale-bathroom"
-          size="116"
-          aria-hidden="true"
-        ></v-icon>
-      </div>
+      <LatestWeightMeasurement
+        :entry="latestEntry"
+        :loading="weightLogs.isFetchLoading.value"
+        :fetch-error="weightLogs.fetchError.value"
+      />
       <div class="journal-note">
         <span class="note-icon"><v-icon icon="mdi-chart-timeline-variant" size="25"></v-icon></span>
         <h2>Measurement details</h2>
@@ -239,75 +216,6 @@ onMounted(reload)
   margin-bottom: 32px;
 }
 
-.latest-measurement {
-  position: relative;
-  overflow: hidden;
-  min-height: 212px;
-  padding: 28px 32px;
-  border-radius: 20px;
-  background: linear-gradient(
-    115deg,
-    rgb(var(--v-theme-measurement)),
-    rgb(var(--v-theme-measurement-end))
-  );
-  color: rgb(var(--v-theme-on-measurement));
-}
-
-.summary-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgb(var(--v-theme-measurement-highlight));
-}
-
-.latest-weight {
-  position: relative;
-  z-index: 1;
-  margin: 12px 0 6px;
-  font-size: 58px;
-  font-weight: 600;
-  letter-spacing: -0.055em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-}
-
-.latest-weight > span {
-  margin-left: 8px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: 0;
-}
-
-.latest-date {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  font-size: 12px;
-}
-
-.summary-watermark {
-  position: absolute;
-  right: 22px;
-  top: 60px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  opacity: 0.1;
-  transform: rotate(-12deg);
-}
-
 .journal-note {
   padding: 24px 28px;
   border: 1px solid rgb(var(--v-theme-note-outline));
@@ -360,10 +268,6 @@ onMounted(reload)
 
   .journal-note {
     padding: 20px 24px;
-  }
-
-  .latest-measurement {
-    padding: 24px;
   }
 }
 </style>

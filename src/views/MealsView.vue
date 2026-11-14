@@ -13,15 +13,10 @@ import {
   toCalendarDate,
   formatCalendarDate,
 } from '@/utils/nutrition.js'
+import DailyNutritionSummary from '@/components/DailyNutritionSummary.vue'
 import MealFormDialog from '@/components/MealFormDialog.vue'
 import DailyNutritionFormDialog from '@/components/DailyNutritionFormDialog.vue'
 import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
-
-const summaryMacros = [
-  { key: 'protein_g', label: 'protein' },
-  { key: 'carbs_g', label: 'carbs' },
-  { key: 'fats_g', label: 'fats' },
-]
 
 const authStore = useAuthStore()
 const meals = useMeals()
@@ -176,105 +171,18 @@ onMounted(reload)
       ></v-btn>
     </v-alert>
 
-    <section
-      class="daily-summary"
-      aria-labelledby="daily-summary-title"
-      :aria-busy="loading"
-      aria-live="polite"
-    >
-      <div class="summary-heading">
-        <h2 id="daily-summary-title" class="summary-label">
-          <span class="status-dot"></span> DAILY NUTRITION
-        </h2>
-        <v-btn
-          v-if="!dailyTotal"
-          color="on-measurement"
-          prepend-icon="mdi-plus"
-          variant="tonal"
-          rounded="lg"
-          :disabled="isBusy || !ready"
-          @click="openDaily"
-          >Add daily total</v-btn
-        >
-        <div v-else class="row-actions">
-          <v-btn
-            icon="mdi-pencil-outline"
-            color="on-measurement-muted"
-            variant="text"
-            size="small"
-            aria-label="Edit daily total"
-            title="Edit daily total"
-            :disabled="isBusy || !ready"
-            @click="openDaily"
-          ></v-btn>
-          <v-btn
-            class="delete-entry-button"
-            icon="mdi-trash-can-outline"
-            color="on-measurement-muted"
-            variant="text"
-            size="small"
-            aria-label="Delete daily total"
-            title="Delete daily total"
-            :disabled="isBusy || !ready"
-            @click="confirmDeleteDaily"
-          ></v-btn>
-        </div>
-      </div>
-      <div class="summary-nutrition">
-        <v-skeleton-loader
-          v-if="loading && calendarDate"
-          type="heading"
-          color="transparent"
-          width="180"
-        ></v-skeleton-loader>
-        <div v-else class="calorie-value">
-          {{ summary ? formatNutrition(summary.values.calories_kcal) : '—' }}<span>kcal</span>
-        </div>
-        <div class="summary-macros">
-          <div v-for="field in summaryMacros" :key="field.key" class="summary-macro">
-            <v-skeleton-loader
-              v-if="loading && calendarDate"
-              type="text"
-              color="transparent"
-              width="100"
-            ></v-skeleton-loader>
-            <template v-else>
-              <span class="macro-value"
-                >{{ summary ? formatNutrition(summary.values[field.key]) : '—' }}g</span
-              >
-              <span>{{ field.label }}</span>
-            </template>
-          </div>
-        </div>
-      </div>
-      <div class="summary-date">
-        <v-icon icon="mdi-calendar-blank-outline" size="16" aria-hidden="true"></v-icon>
-        {{ formatCalendarDate(calendarDate) }}
-        <span v-if="summary" class="summary-source">
-          · {{ summary.source === 'manual' ? 'Manual daily total' : 'Calculated from meals' }}
-        </span>
-      </div>
-      <p v-if="ready && dailyTotal?.notes" class="summary-notes entry-description">
-        {{ dailyTotal.notes }}
-      </p>
-      <p v-if="!calendarDate" class="summary-caption">Select a valid date to view nutrition.</p>
-      <p v-else-if="loading" class="summary-caption">Loading nutrition…</p>
-      <p v-else-if="fetchError" class="summary-caption">
-        Daily nutrition unavailable. Reload both registration methods to see a reliable total.
-      </p>
-      <p v-else-if="!summary" class="summary-caption">
-        No nutrition recorded for this date. Add a meal or a manual daily total.
-      </p>
-      <p v-else-if="summary.source === 'manual'" class="summary-caption">
-        This manual daily total replaces the sum of your meals. Your meals remain saved.
-      </p>
-      <v-icon
-        class="summary-watermark"
-        icon="mdi-silverware-fork-knife"
-        size="116"
-        aria-hidden="true"
-      ></v-icon>
-    </section>
+    <DailyNutritionSummary
+      :summary="summary"
+      :daily-total="dailyTotal"
+      :date="calendarDate"
+      :loading="loading"
+      :fetch-error="fetchError"
+      :busy="isBusy"
+      :ready="ready"
+      @add="openDaily"
+      @edit="openDaily"
+      @delete="confirmDeleteDaily"
+    />
 
     <section
       class="registration-card"
@@ -458,126 +366,13 @@ h3 {
   margin-bottom: 24px;
   background: rgb(var(--v-theme-surface));
 }
-.daily-summary {
-  position: relative;
-  overflow: hidden;
-  min-height: 212px;
-  padding: 28px 32px;
-  margin-bottom: 32px;
-  border-radius: 20px;
-  background: linear-gradient(
-    115deg,
-    rgb(var(--v-theme-measurement)),
-    rgb(var(--v-theme-measurement-end))
-  );
-  color: rgb(var(--v-theme-on-measurement));
-}
-.summary-heading {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-.summary-label {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-}
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgb(var(--v-theme-measurement-highlight));
-}
 .meal-nutrition {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
-.summary-nutrition {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px 32px;
-  margin: 12px 0 16px;
-}
-.calorie-value {
-  margin: 0;
-  font-size: 58px;
-  font-weight: 600;
-  letter-spacing: -0.055em;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-}
-.calorie-value > span {
-  margin-left: 8px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: 0;
-}
-.summary-macros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-}
-.summary-macro {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  font-size: 12px;
-}
-.macro-value {
-  color: rgb(var(--v-theme-on-measurement));
-  font-size: 16px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.summary-date {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 7px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  font-size: 12px;
-}
-.summary-caption {
-  position: relative;
-  z-index: 1;
-  margin-top: 12px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  font-size: 12px;
-}
-.summary-notes {
-  position: relative;
-  z-index: 1;
-  color: rgb(var(--v-theme-on-measurement-muted));
-}
 .meal-summary-note {
   margin-bottom: 16px;
-}
-.summary-watermark {
-  position: absolute;
-  right: 22px;
-  top: 60px;
-  color: rgb(var(--v-theme-on-measurement-muted));
-  opacity: 0.1;
-  transform: rotate(-12deg);
 }
 .row-actions {
   display: flex;
@@ -675,10 +470,6 @@ h3 {
   }
   .registration-card {
     padding: 20px 16px;
-  }
-  .daily-summary {
-    padding: 24px;
-    margin-bottom: 24px;
   }
   .row-date {
     font-size: 11px;
