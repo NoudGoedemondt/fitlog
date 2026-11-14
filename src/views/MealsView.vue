@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import PageHeading from '@/components/PageHeading.vue'
 import { useAuthStore } from '@/stores/auth.js'
 import { useMeals } from '@/composables/useMeals.js'
 import { useDailyNutritionTotals } from '@/composables/useDailyNutritionTotals.js'
@@ -137,11 +138,12 @@ onMounted(reload)
 <template>
   <section class="meals-page" aria-labelledby="meals-page-title">
     <header class="page-heading">
-      <div>
-        <div class="eyebrow"><span></span> NUTRITION JOURNAL</div>
-        <h1 id="meals-page-title">Meals<span>.</span></h1>
-        <p>Record individual meals or enter your nutrition for the whole day.</p>
-      </div>
+      <PageHeading
+        id="meals-page-title"
+        eyebrow="NUTRITION JOURNAL"
+        title="Meals"
+        description="Record individual meals or enter your nutrition for the whole day."
+      />
       <v-date-input
         v-model="selectedDate"
         input-format="dd-mm-yyyy"
@@ -316,30 +318,6 @@ onMounted(reload)
   align-items: center;
   gap: 20px;
   margin-bottom: 24px;
-}
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: rgb(var(--v-theme-primary));
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-}
-.eyebrow > span {
-  width: 22px;
-  height: 2px;
-  background: currentColor;
-}
-h1 {
-  margin: 8px 0;
-  font-size: clamp(32px, 4vw, 44px);
-  font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 1.2;
-}
-h1 > span {
-  color: rgb(var(--v-theme-primary));
 }
 p,
 dt {

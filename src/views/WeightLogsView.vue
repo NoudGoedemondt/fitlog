@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import PageHeading from '@/components/PageHeading.vue'
 import { useWeightLogs } from '@/composables/useWeightLogs.js'
 import { formatMeasuredAt } from '@/utils/measuredAtFormatting.js'
 import { formatWeight } from '@/utils/weightFormatting.js'
@@ -71,11 +72,12 @@ onMounted(reload)
 <template>
   <section class="weight-page" aria-labelledby="weight-page-title">
     <header class="page-heading">
-      <div>
-        <div class="eyebrow"><span class="eyebrow-line"></span> BODY MEASUREMENTS</div>
-        <h1 id="weight-page-title">Weight logs<span>.</span></h1>
-        <p class="page-description">Record and manage your weight measurements.</p>
-      </div>
+      <PageHeading
+        id="weight-page-title"
+        eyebrow="BODY MEASUREMENTS"
+        title="Weight logs"
+        description="Record and manage your weight measurements."
+      />
       <v-btn
         class="add-entry-button"
         color="primary"
@@ -165,40 +167,6 @@ onMounted(reload)
   align-items: center;
   gap: 24px;
   margin-bottom: 32px;
-}
-
-.eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: rgb(var(--v-theme-primary));
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-}
-
-.eyebrow-line {
-  width: 22px;
-  height: 2px;
-  background: currentColor;
-}
-
-.page-heading h1 {
-  margin: 8px 0;
-  font-size: clamp(32px, 4vw, 44px);
-  font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 1.2;
-}
-
-.page-heading h1 > span {
-  color: rgb(var(--v-theme-primary));
-}
-
-.page-description {
-  color: rgb(var(--v-theme-on-surface-variant));
-  font-size: 14px;
-  line-height: 1.6;
 }
 
 .add-entry-button {
