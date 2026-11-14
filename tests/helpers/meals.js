@@ -40,7 +40,7 @@ export async function loadMealsFrontend() {
     },
   })
   try {
-    const { default: view } = await import('../../src/views/MealsView.vue')
+    const { default: view } = await import('../../src/views/NutritionView.vue')
     const { default: mealDialog } = await import('../../src/components/MealFormDialog.vue')
     const { default: dailyDialog } = await import('../../src/components/DailyNutritionFormDialog.vue')
     const { default: deleteDialog } = await import('../../src/components/DeleteEntryDialog.vue')

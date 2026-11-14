@@ -141,7 +141,7 @@ onMounted(reload)
       <PageHeading
         id="meals-page-title"
         eyebrow="NUTRITION JOURNAL"
-        title="Meals"
+        title="Nutrition"
         description="Record individual meals or enter your nutrition for the whole day."
       />
       <v-date-input

@@ -12,7 +12,7 @@ const sections = [
   },
   {
     title: 'Body measurements',
-    description: 'Weight logs and body profile',
+    description: 'Weight measurements and body profile',
     icon: 'mdi-account-outline',
   },
 ]
@@ -25,13 +25,13 @@ const features = [
     available: false,
   },
   {
-    title: 'Meals',
+    title: 'Nutrition',
     icon: 'mdi-food-apple-outline',
     description: 'Keep a record of meals, calories and macronutrients.',
     available: false,
   },
   {
-    title: 'Weight logs',
+    title: 'Weight',
     icon: 'mdi-scale-bathroom',
     description: 'Record your weight and review, edit or remove previous measurements.',
     available: true,
@@ -166,7 +166,7 @@ const features = [
       <div>
         <h2 id="getting-started-title">Choose a section</h2>
         <p>
-          Use the navigation to open workouts, routines, meals, weight logs or your body profile.
+          Use the navigation to open Workouts, Routines, Nutrition, Weight or your Body profile.
         </p>
       </div>
     </aside>

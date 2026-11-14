@@ -12,7 +12,7 @@ const createTestRouter = (base = '/') =>
     history: createMemoryHistory(base),
     routes: [
       { path: '/', name: 'home', component: {} },
-      { path: '/weight-logs', name: 'weights', component: {} },
+      { path: '/weight', name: 'weights', component: {} },
       { path: '/login', name: 'login', component: {}, meta: { guestOnly: true } },
       {
         path: '/forgot-password',
@@ -40,19 +40,19 @@ test('reset links preserve an internal destination, query and hash', () => {
   const url = new URL(
     getPasswordResetUrl(
       createTestRouter(),
-      '/weight-logs?period=month#history',
+      '/weight?period=month#history',
       'https://fitlog.example',
     ),
   )
   assert.equal(url.origin, 'https://fitlog.example')
   assert.equal(url.pathname, '/reset-password')
-  assert.equal(url.searchParams.get('redirect'), '/weight-logs?period=month#history')
+  assert.equal(url.searchParams.get('redirect'), '/weight?period=month#history')
   assert.equal(url.hash, '')
 })
 
 test('reset links support a frontend base path', () => {
   const url = new URL(
-    getPasswordResetUrl(createTestRouter('/fitlog/'), '/weight-logs', 'https://fitlog.example'),
+    getPasswordResetUrl(createTestRouter('/fitlog/'), '/weight', 'https://fitlog.example'),
   )
   assert.equal(url.pathname, '/fitlog/reset-password')
 })

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import PageHeading from '@/components/PageHeading.vue'
-import { useWeightLogs } from '@/composables/useWeightLogs.js'
+import { useWeightLogs } from '@/composables/useWeights.js'
 import { formatMeasuredAt } from '@/utils/measuredAtFormatting.js'
 import { formatWeight } from '@/utils/weightFormatting.js'
 import { useAuthStore } from '@/stores/auth.js'
@@ -75,7 +75,7 @@ onMounted(reload)
       <PageHeading
         id="weight-page-title"
         eyebrow="BODY MEASUREMENTS"
-        title="Weight logs"
+        title="Weight"
         description="Record and manage your weight measurements."
       />
       <v-btn

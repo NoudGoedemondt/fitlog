@@ -67,7 +67,7 @@ secret key, or database password here. Changes to these variables require a new 
 Keep local development values in your ignored `.env` file.
 
 The router uses `createWebHistory`. `vercel.json` rewrites application paths to
-`/index.html` so opening or refreshing routes such as `/weight-logs`,
+`/index.html` so opening or refreshing routes such as `/weight`,
 `/auth/confirm`, and `/reset-password` loads the Vue application.
 See [Vercel's Vite deployment documentation](https://vercel.com/docs/frameworks/frontend/vite).
 
