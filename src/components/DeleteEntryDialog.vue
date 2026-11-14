@@ -1,14 +1,19 @@
 <script setup>
-import { formatMeasuredAt } from '@/utils/measuredAtFormatting.js'
-import { formatWeight } from '@/utils/weightFormatting.js'
+import { useId } from 'vue'
 
 const isOpen = defineModel({ type: Boolean, required: true })
 const props = defineProps({
   entry: { type: Object, default: null },
+  title: { type: String, required: true },
+  cancelText: { type: String, required: true },
+  summary: { type: String, default: '' },
+  detail: { type: String, default: '' },
+  description: { type: String, default: '' },
   busy: { type: Boolean, default: false },
   error: { type: String, default: null },
 })
 const emit = defineEmits(['confirm'])
+const titleId = useId()
 const updateOpen = (open) => {
   if (!props.busy) isOpen.value = open
 }
@@ -23,7 +28,7 @@ const confirm = () => {
     @update:model-value="updateOpen"
     :persistent="busy"
     max-width="440"
-    aria-labelledby="delete-measurement-title"
+    :aria-labelledby="titleId"
   >
     <v-card class="entry-dialog" rounded="xl">
       <div class="dialog-heading">
@@ -31,20 +36,21 @@ const confirm = () => {
           ><v-icon icon="mdi-trash-can-outline" size="24"></v-icon
         ></span>
         <div>
-          <h2 id="delete-measurement-title">Delete measurement?</h2>
+          <h2 :id="titleId">{{ title }}</h2>
           <p>This action cannot be undone.</p>
         </div>
       </div>
       <v-card-text>
         <p v-if="entry" class="delete-summary">
-          <strong>{{ formatWeight(entry.weight_kg) }} kg</strong>
-          <span>{{ formatMeasuredAt(entry.measured_at) }}</span>
+          <strong>{{ summary }}</strong>
+          <span v-if="detail">{{ detail }}</span>
         </p>
+        <p v-if="description" class="mt-3">{{ description }}</p>
         <v-alert v-if="error" type="error" variant="tonal" class="mt-4">{{ error }}</v-alert>
       </v-card-text>
       <v-card-actions class="dialog-actions">
         <v-btn
-          text="Keep measurement"
+          :text="cancelText"
           variant="text"
           :disabled="busy"
           @click="updateOpen(false)"
@@ -64,7 +70,7 @@ const confirm = () => {
   </v-dialog>
 </template>
 
-<style scoped src="../assets/weight-dialog.css"></style>
+<style scoped src="../assets/entry-dialog.css"></style>
 
 <style scoped>
 .delete-dialog-icon {
@@ -83,6 +89,7 @@ const confirm = () => {
   border: 1px solid rgb(var(--v-theme-outline));
   border-radius: 12px;
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 .delete-summary > span {

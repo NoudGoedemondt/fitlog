@@ -15,8 +15,7 @@ import {
 } from '@/utils/nutrition.js'
 import MealEntryDialog from '@/components/MealEntryDialog.vue'
 import DailyNutritionDialog from '@/components/DailyNutritionDialog.vue'
-import DeleteMealDialog from '@/components/DeleteMealDialog.vue'
-import DeleteDailyNutritionDialog from '@/components/DeleteDailyNutritionDialog.vue'
+import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
 
 const summaryMacros = [
   { key: 'protein_g', label: 'protein' },
@@ -372,18 +371,26 @@ onMounted(reload)
     :error="formError || dailyTotals.mutationError.value"
     @save="saveDaily"
   />
-  <DeleteMealDialog
+  <DeleteEntryDialog
     v-model="deleteMealIsOpen"
     :entry="deletingMeal"
     :busy="isBusy"
     :error="meals.mutationError.value"
+    title="Delete meal?"
+    cancel-text="Keep meal"
+    :summary="deletingMeal?.name || ''"
+    :detail="deletingMeal ? formatMeasuredAt(deletingMeal.consumed_at) : ''"
     @confirm="removeMeal"
   />
-  <DeleteDailyNutritionDialog
+  <DeleteEntryDialog
     v-model="deleteDailyIsOpen"
     :entry="deletingDailyTotal"
     :busy="isBusy"
     :error="dailyTotals.mutationError.value"
+    title="Delete daily total?"
+    cancel-text="Keep daily total"
+    :summary="deletingDailyTotal ? formatCalendarDate(deletingDailyTotal.log_date) : ''"
+    description="The daily summary will use your individual meals again. If there are no meals, no nutrition will be recorded for this date."
     @confirm="removeDaily"
   />
 </template>

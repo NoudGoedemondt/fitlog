@@ -5,7 +5,7 @@ import { formatMeasuredAt } from '@/utils/measuredAtFormatting.js'
 import { formatWeight } from '@/utils/weightFormatting.js'
 import { useAuthStore } from '@/stores/auth.js'
 import WeightEntryDialog from '@/components/WeightEntryDialog.vue'
-import DeleteWeightDialog from '@/components/DeleteWeightDialog.vue'
+import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
 import WeightHistoryTable from '@/components/WeightHistoryTable.vue'
 
 const authStore = useAuthStore()
@@ -162,11 +162,15 @@ onMounted(reload)
     :error="formError || weightLogs.mutationError.value"
     @save="saveWeight"
   />
-  <DeleteWeightDialog
+  <DeleteEntryDialog
     v-model="deleteWeightIsOpen"
     :entry="deletingWeight"
     :busy="isBusy"
     :error="weightLogs.mutationError.value"
+    title="Delete measurement?"
+    cancel-text="Keep measurement"
+    :summary="deletingWeight ? `${formatWeight(deletingWeight.weight_kg)} kg` : ''"
+    :detail="deletingWeight ? formatMeasuredAt(deletingWeight.measured_at) : ''"
     @confirm="removeWeight"
   />
 </template>

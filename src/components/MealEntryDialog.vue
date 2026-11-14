@@ -178,4 +178,4 @@ const submit = async () => {
   </v-dialog>
 </template>
 
-<style scoped src="../assets/weight-dialog.css"></style>
+<style scoped src="../assets/entry-dialog.css"></style>
