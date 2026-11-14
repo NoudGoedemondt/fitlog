@@ -70,7 +70,7 @@ const confirm = () => {
   </v-dialog>
 </template>
 
-<style scoped src="../assets/entry-dialog.css"></style>
+<style scoped src="../styles/entry-dialog.css"></style>
 
 <style scoped>
 .delete-dialog-icon {

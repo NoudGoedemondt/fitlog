@@ -61,7 +61,7 @@ const save = () => {
   </v-dialog>
 </template>
 
-<style scoped src="../assets/entry-dialog.css"></style>
+<style scoped src="../styles/entry-dialog.css"></style>
 
 <style scoped>
 :deep(.entry-form) {

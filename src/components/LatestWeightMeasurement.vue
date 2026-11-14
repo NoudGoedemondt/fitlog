@@ -46,4 +46,4 @@ defineProps({
   </div>
 </template>
 
-<style scoped src="../assets/summary-card.css"></style>
+<style scoped src="../styles/summary-card.css"></style>
