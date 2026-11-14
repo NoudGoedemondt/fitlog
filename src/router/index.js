@@ -81,8 +81,12 @@ const router = createRouter({
     },
     {
       path: '/meals',
-      name: 'meals',
-      component: () => import('../views/MealsView.vue'),
+      redirect: { name: 'nutrition' },
+    },
+    {
+      path: '/nutrition',
+      name: 'nutrition',
+      component: () => import('../views/NutritionView.vue'),
       meta: { requiresAuth: true },
     },
     {
@@ -93,8 +97,12 @@ const router = createRouter({
     },
     {
       path: '/weight-logs',
-      name: 'weight-logs',
-      component: () => import('../views/WeightLogsView.vue'),
+      redirect: { name: 'weight' },
+    },
+    {
+      path: '/weight',
+      name: 'weight',
+      component: () => import('../views/WeightView.vue'),
       meta: { requiresAuth: true },
     },
     {

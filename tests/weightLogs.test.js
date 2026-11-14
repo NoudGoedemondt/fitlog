@@ -136,12 +136,12 @@ for (const operation of operations) {
     const { state, unmount } = mountView(view)
     t.after(unmount)
     await Promise.resolve()
-    if (operation.name === 'delete') state.toggleRemove(1)
-    else if (operation.name === 'update') state.edit(1)
-    else state.add()
+    if (operation.name === 'delete') state.confirmDeleteWeight(older)
+    else if (operation.name === 'update') state.openWeight(older)
+    else state.openWeight()
     const isOpen = () =>
-      operation.name === 'delete' ? state.deleteDialogIsOpen : state.dialogIsOpen
-    const submit = () => (operation.name === 'delete' ? state.remove(1) : state.save(values))
+      operation.name === 'delete' ? state.deleteWeightIsOpen : state.weightDialogIsOpen
+    const submit = () => (operation.name === 'delete' ? state.removeWeight(1) : state.saveWeight(values))
 
     mockRequest(async () => ({ error: { message: 'Mutation failed' } }))
     await submit()
@@ -163,20 +163,20 @@ for (const operation of operations) {
     await Promise.resolve()
     state.weightLogs[`${operation.name}WeightEntry`] = async () => false
     if (operation.name === 'delete') {
-      state.toggleRemove(1)
-      await state.remove(1)
-      assert.equal(state.deleteDialogIsOpen, true)
+      state.confirmDeleteWeight(older)
+      await state.removeWeight(1)
+      assert.equal(state.deleteWeightIsOpen, true)
     } else {
-      if (operation.name === 'update') state.edit(1)
-      else state.add()
-      await state.save(values)
-      assert.equal(state.dialogIsOpen, true)
+      if (operation.name === 'update') state.openWeight(older)
+      else state.openWeight()
+      await state.saveWeight(values)
+      assert.equal(state.weightDialogIsOpen, true)
     }
     assert.equal(state.weightLogs.mutationError.value, null)
   })
 }
 
-test('saving without authentication or a valid target keeps the dialog open without a request', async (t) => {
+test('saving without authentication keeps the dialog open without a request', async (t) => {
   mockRequest(async () => ({ data: [], error: null }))
   const { state, unmount } = mountView(view)
   t.after(unmount)
@@ -187,18 +187,17 @@ test('saving without authentication or a valid target keeps the dialog open with
   const calls = mockRequest(() => {
     throw new Error('No mutation expected')
   })
-  state.add()
+  state.openWeight()
   authStore.user = null
-  await state.save(values)
+  await state.saveWeight(values)
   assert.equal(state.formError, 'Please log in again before saving a weight entry.')
-  assert.equal(state.dialogIsOpen, true)
+  assert.equal(state.weightDialogIsOpen, true)
   assert.equal(state.isBusy, false)
 
   authStore.user = { id: 'test-user' }
-  state.dialogTarget = false
-  await state.save(values)
-  assert.equal(state.formError, 'Reopen the weight entry before saving.')
-  assert.equal(state.dialogIsOpen, true)
+  state.weightDialogIsOpen = false
+  await state.saveWeight(values)
+  assert.equal(state.weightDialogIsOpen, false)
   assert.equal(state.isBusy, false)
   assert.deepEqual(calls, [])
 })
@@ -208,7 +207,7 @@ test('pending mutations block dialog changes and duplicate submissions', async (
   const { state, unmount } = mountView(view)
   t.after(unmount)
   await Promise.resolve()
-  state.toggleRemove(1)
+  state.confirmDeleteWeight(older)
   let finish
   const calls = mockRequest(
     () =>
@@ -216,20 +215,65 @@ test('pending mutations block dialog changes and duplicate submissions', async (
         finish = resolve
       }),
   )
-  const pending = state.remove(1)
+  const pending = state.removeWeight(1)
   const pendingCallCount = calls.length
   assert.equal(state.isBusy, true)
-  state.deleteDialogIsOpen = false
-  state.toggleRemove(1)
-  state.add()
-  state.edit(1)
-  await state.save(values)
-  await state.remove(1)
-  assert.equal(state.deleteDialogIsOpen, true)
-  assert.equal(state.dialogIsOpen, false)
+  state.deleteWeightIsOpen = false
+  state.confirmDeleteWeight(older)
+  state.openWeight()
+  state.openWeight(older)
+  await state.saveWeight(values)
+  await state.removeWeight(1)
+  assert.equal(state.deleteWeightIsOpen, true)
+  assert.equal(state.weightDialogIsOpen, false)
   assert.equal(calls.length, pendingCallCount)
   finish({ error: { message: 'Mutation failed' } })
   await pending
   assert.equal(state.isBusy, false)
-  assert.equal(state.deleteDialogIsOpen, true)
+  assert.equal(state.deleteWeightIsOpen, true)
+})
+
+test('opening a new measurement after editing clears the selection and previous errors', async (t) => {
+  mockRequest(async () => ({ data: [newer, older], error: null }))
+  const { state, unmount } = mountView(view)
+  t.after(unmount)
+  await Promise.resolve()
+
+  state.openWeight(older)
+  assert.deepEqual(state.editingWeight, older)
+  state.weightDialogIsOpen = false
+  state.formError = 'Earlier form error'
+  state.weightLogs.mutationError.value = 'Earlier mutation error'
+  state.openWeight()
+  assert.equal(state.weightDialogIsOpen, true)
+  assert.equal(state.editingWeight, null)
+  assert.equal(state.formError, null)
+  assert.equal(state.weightLogs.mutationError.value, null)
+
+  const calls = mockRequest(async () => ({ data: { id: 3, ...values }, error: null }))
+  await state.saveWeight(values)
+  assert.deepEqual(calls, operations[0].calls)
+  assert.equal(state.weightDialogIsOpen, false)
+  assert.deepEqual(state.weightLogs.weightEntries.value, [{ id: 3, ...values }, newer, older])
+})
+
+test('closed dialogs and mismatched delete confirmations send no mutation request', async (t) => {
+  mockRequest(async () => ({ data: [newer, older], error: null }))
+  const { state, unmount } = mountView(view)
+  t.after(unmount)
+  await Promise.resolve()
+  const calls = mockRequest(() => {
+    throw new Error('No mutation expected')
+  })
+
+  await state.saveWeight(values)
+  await state.removeWeight(older.id)
+  state.confirmDeleteWeight(older)
+  await state.removeWeight(newer.id)
+  assert.equal(state.deleteWeightIsOpen, true)
+  assert.deepEqual(state.deletingWeight, older)
+  state.deleteWeightIsOpen = false
+  assert.equal(state.deletingWeight, null)
+  await state.removeWeight(older.id)
+  assert.deepEqual(calls, [])
 })

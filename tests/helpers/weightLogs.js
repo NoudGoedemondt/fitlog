@@ -37,7 +37,7 @@ export const loadWeightLogs = async () => {
         }
       }
       if (url.endsWith('.vue')) {
-        const source = url.endsWith('/WeightLogsView.vue')
+        const source = url.endsWith('/WeightView.vue')
           ? compileScript(parse(readFileSync(new URL(url), 'utf8')).descriptor, {
               id: 'weight-logs-test',
             }).content
@@ -48,8 +48,8 @@ export const loadWeightLogs = async () => {
     },
   })
   try {
-    const { useWeightLogs } = await import('../../src/composables/useWeightLogs.js')
-    const { default: view } = await import('../../src/views/WeightLogsView.vue')
+    const { useWeightLogs } = await import('../../src/composables/useWeights.js')
+    const { default: view } = await import('../../src/views/WeightView.vue')
     return { useWeightLogs, view }
   } finally {
     hooks.deregister()

@@ -3,7 +3,7 @@ import { combineToMeasuredAt, splitMeasuredAt } from './measuredAtFormatting.js'
 export const nutritionFields = [
   { key: 'calories_kcal', label: 'Calories', unit: 'kcal' },
   { key: 'protein_g', label: 'Protein', unit: 'g' },
-  { key: 'carbs_g', label: 'Carbohydrates', unit: 'g' },
+  { key: 'carbs_g', label: 'Carbs', unit: 'g' },
   { key: 'fats_g', label: 'Fat', unit: 'g' },
 ]
 

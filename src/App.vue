@@ -29,8 +29,8 @@ const mobileNavigationIsOpen = ref(false)
 const navigationItems = [
   { title: 'Workouts', to: '/workouts', icon: 'mdi-dumbbell' },
   { title: 'Routines', to: '/routines', icon: 'mdi-clipboard-text-outline' },
-  { title: 'Meals', to: '/meals', icon: 'mdi-food-apple-outline' },
-  { title: 'Weight logs', to: '/weight-logs', icon: 'mdi-scale-bathroom' },
+  { title: 'Nutrition', to: '/nutrition', icon: 'mdi-food-apple-outline' },
+  { title: 'Weight', to: '/weight', icon: 'mdi-scale-bathroom' },
   { title: 'Body profile', to: '/body-profile', icon: 'mdi-account-outline' },
 ]
 const navigationIsDisabled = computed(() => authStore.isLoading || !authStore.user)

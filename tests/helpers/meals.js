@@ -40,10 +40,13 @@ export async function loadMealsFrontend() {
     },
   })
   try {
-    const { default: view } = await import('../../src/views/MealsView.vue')
-    const { default: mealDialog } = await import('../../src/components/MealEntryDialog.vue')
-    const { default: dailyDialog } = await import('../../src/components/DailyNutritionDialog.vue')
-    return { view, mealDialog, dailyDialog }
+    const { default: view } = await import('../../src/views/NutritionView.vue')
+    const { default: mealDialog } = await import('../../src/components/MealFormDialog.vue')
+    const { default: dailyDialog } = await import('../../src/components/DailyNutritionFormDialog.vue')
+    const { default: deleteDialog } = await import('../../src/components/DeleteEntryDialog.vue')
+    const { default: formDialog } = await import('../../src/components/FormDialog.vue')
+    const { default: weightDialog } = await import('../../src/components/WeightMeasurementFormDialog.vue')
+    return { view, mealDialog, dailyDialog, deleteDialog, formDialog, weightDialog }
   } finally {
     hooks.deregister()
   }
@@ -73,6 +76,7 @@ export function mountDialog(component, initialProps) {
           props.modelValue = value
         },
         onSave: (value) => events.push(value),
+        onConfirm: (value) => events.push(value),
       }),
   })
   app.mount({})

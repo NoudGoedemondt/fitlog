@@ -203,7 +203,6 @@ for (const [name, component, record] of [
     mounted.props.error = 'Database unavailable'
     mounted.props.busy = true
     await nextTick()
-    state.updateOpen(false)
     await state.submit()
     assert.equal(mounted.props.modelValue, true)
     assert.equal(mounted.events.length, 0)
@@ -242,7 +241,6 @@ for (const [name, component, record] of [
     const pending = mounted.state.submit()
     assert.equal(mounted.state.isBusy, true)
     await mounted.state.submit()
-    mounted.state.updateOpen(false)
     assert.equal(mounted.props.modelValue, true)
     finish({ valid: false })
     await pending

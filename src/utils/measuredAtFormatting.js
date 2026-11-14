@@ -60,3 +60,9 @@ export function formatMeasuredAt(value) {
   const year = String(date.getFullYear()).padStart(4, '0')
   return `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${year} ${pad(hour)}:${pad(minute)}`
 }
+
+export function formatMeasuredTime(value) {
+  const { date, hour, minute } = splitMeasuredAt(value)
+  if (!date) return '—'
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+}

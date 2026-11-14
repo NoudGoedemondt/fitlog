@@ -16,7 +16,7 @@ const createTestRouter = (user = null) => {
       { path: '/auth/confirm', name: 'auth-confirm', component, meta: { authCallback: true } },
       { path: '/forgot-password', name: 'forgot-password', component, meta: { authPage: true } },
       { path: '/reset-password', name: 'reset-password', component, meta: { authCallback: true } },
-      { path: '/weight-logs', name: 'weight-logs', component, meta: { requiresAuth: true } },
+      { path: '/weight', name: 'weight', component, meta: { requiresAuth: true } },
     ],
   })
   router.beforeEach((to) => getAuthRouteRedirect(router, to, auth.user))
@@ -25,19 +25,19 @@ const createTestRouter = (user = null) => {
 
 test('returns to the originally requested page with query and hash after login', async () => {
   const { router, auth } = createTestRouter()
-  await router.push('/weight-logs?period=month#history')
+  await router.push('/weight?period=month#history')
   assert.equal(router.currentRoute.value.name, 'login')
-  assert.equal(router.currentRoute.value.query.redirect, '/weight-logs?period=month#history')
+  assert.equal(router.currentRoute.value.query.redirect, '/weight?period=month#history')
 
   const destination = getAuthRedirect(router, router.currentRoute.value.query.redirect)
   auth.user = { id: 'test-user' }
   await router.replace(destination)
-  assert.equal(router.currentRoute.value.fullPath, '/weight-logs?period=month#history')
+  assert.equal(router.currentRoute.value.fullPath, '/weight?period=month#history')
 })
 
 test('preserves the return destination when switching between login and registration', async () => {
   const { router } = createTestRouter()
-  await router.push('/weight-logs?period=month#history')
+  await router.push('/weight?period=month#history')
   await router.push({
     name: 'register',
     query: { redirect: router.currentRoute.value.query.redirect },
@@ -47,7 +47,7 @@ test('preserves the return destination when switching between login and registra
     name: 'login',
     query: { redirect: router.currentRoute.value.query.redirect },
   })
-  assert.equal(router.currentRoute.value.query.redirect, '/weight-logs?period=month#history')
+  assert.equal(router.currentRoute.value.query.redirect, '/weight?period=month#history')
 })
 
 test('signed-in users cannot stay on login or registration', async () => {
@@ -55,19 +55,19 @@ test('signed-in users cannot stay on login or registration', async () => {
   for (const name of ['login', 'register', 'verify-email']) {
     await router.push({ name })
     assert.equal(router.currentRoute.value.name, 'home')
-    await router.push({ name, query: { redirect: '/weight-logs?period=month#history' } })
-    assert.equal(router.currentRoute.value.fullPath, '/weight-logs?period=month#history')
+    await router.push({ name, query: { redirect: '/weight?period=month#history' } })
+    assert.equal(router.currentRoute.value.fullPath, '/weight?period=month#history')
   }
 })
 
 test('session loss redirects to login and remembers the current protected page', async () => {
   const { router, auth } = createTestRouter({ id: 'test-user' })
-  await router.push('/weight-logs?period=month#history')
+  await router.push('/weight?period=month#history')
   auth.user = null
   const redirect = getAuthRouteRedirect(router, router.currentRoute.value, auth.user)
   await router.replace(redirect)
   assert.equal(router.currentRoute.value.name, 'login')
-  assert.equal(router.currentRoute.value.query.redirect, '/weight-logs?period=month#history')
+  assert.equal(router.currentRoute.value.query.redirect, '/weight?period=month#history')
 })
 
 test('rejects external, malformed, repeated and guest-only return destinations', () => {
@@ -76,12 +76,12 @@ test('rejects external, malformed, repeated and guest-only return destinations',
     undefined,
     null,
     '',
-    ['/', '/weight-logs'],
+    ['/', '/weight'],
     'https://example.invalid',
     '//example.invalid',
     '/\\example.invalid',
     'javascript:alert(1)',
-    '/weight-logs\n',
+    '/weight\n',
     '/login',
     '/register?redirect=/login',
     '/verify-email',
@@ -105,7 +105,7 @@ test('rejects unknown routes and catches route resolution errors', () => {
           throw new Error('Invalid route')
         },
       },
-      '/weight-logs',
+      '/weight',
     ),
     { name: 'home' },
   )
@@ -122,7 +122,7 @@ test('public routes remain accessible to both guests and signed-in users', async
 
 test('the confirmation callback remains accessible even with an existing session', async () => {
   const { router } = createTestRouter({ id: 'test-user' })
-  await router.push('/auth/confirm?redirect=/weight-logs#error=access_denied')
+  await router.push('/auth/confirm?redirect=/weight#error=access_denied')
   assert.equal(router.currentRoute.value.name, 'auth-confirm')
 })
 

@@ -12,7 +12,7 @@ const createTestRouter = (base = '/') => {
       { path: '/login', name: 'login', component, meta: { guestOnly: true } },
       { path: '/verify-email', name: 'verify-email', component, meta: { guestOnly: true } },
       { path: '/auth/confirm', name: 'auth-confirm', component, meta: { authCallback: true } },
-      { path: '/weight-logs', name: 'weights', component, meta: { requiresAuth: true } },
+      { path: '/weight', name: 'weights', component, meta: { requiresAuth: true } },
     ],
   })
 }
@@ -21,22 +21,22 @@ test('confirmation URL keeps the original internal destination, including query 
   const url = new URL(
     getEmailConfirmationUrl(
       createTestRouter(),
-      '/weight-logs?period=month#history',
+      '/weight?period=month#history',
       'https://fitlog.example',
     ),
   )
   assert.equal(url.origin, 'https://fitlog.example')
   assert.equal(url.pathname, '/auth/confirm')
-  assert.equal(url.searchParams.get('redirect'), '/weight-logs?period=month#history')
+  assert.equal(url.searchParams.get('redirect'), '/weight?period=month#history')
   assert.equal(url.hash, '')
 })
 
 test('confirmation URLs support a frontend deployed under a base path', () => {
   const url = new URL(
-    getEmailConfirmationUrl(createTestRouter('/fitlog/'), '/weight-logs', 'https://fitlog.example'),
+    getEmailConfirmationUrl(createTestRouter('/fitlog/'), '/weight', 'https://fitlog.example'),
   )
   assert.equal(url.pathname, '/fitlog/auth/confirm')
-  assert.equal(url.searchParams.get('redirect'), '/weight-logs')
+  assert.equal(url.searchParams.get('redirect'), '/weight')
 })
 
 test('confirmation URLs reject external and authentication destinations', () => {
