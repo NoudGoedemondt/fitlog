@@ -41,10 +41,12 @@ export async function loadMealsFrontend() {
   })
   try {
     const { default: view } = await import('../../src/views/MealsView.vue')
-    const { default: mealDialog } = await import('../../src/components/MealEntryDialog.vue')
-    const { default: dailyDialog } = await import('../../src/components/DailyNutritionDialog.vue')
+    const { default: mealDialog } = await import('../../src/components/MealFormDialog.vue')
+    const { default: dailyDialog } = await import('../../src/components/DailyNutritionFormDialog.vue')
     const { default: deleteDialog } = await import('../../src/components/DeleteEntryDialog.vue')
-    return { view, mealDialog, dailyDialog, deleteDialog }
+    const { default: formDialog } = await import('../../src/components/FormDialog.vue')
+    const { default: weightDialog } = await import('../../src/components/WeightMeasurementFormDialog.vue')
+    return { view, mealDialog, dailyDialog, deleteDialog, formDialog, weightDialog }
   } finally {
     hooks.deregister()
   }

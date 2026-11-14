@@ -13,8 +13,8 @@ import {
   toCalendarDate,
   formatCalendarDate,
 } from '@/utils/nutrition.js'
-import MealEntryDialog from '@/components/MealEntryDialog.vue'
-import DailyNutritionDialog from '@/components/DailyNutritionDialog.vue'
+import MealFormDialog from '@/components/MealFormDialog.vue'
+import DailyNutritionFormDialog from '@/components/DailyNutritionFormDialog.vue'
 import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
 
 const summaryMacros = [
@@ -354,7 +354,7 @@ onMounted(reload)
       </div>
     </section>
   </section>
-  <MealEntryDialog
+  <MealFormDialog
     v-model="mealDialogIsOpen"
     :entry="editingMeal"
     :date="calendarDate || ''"
@@ -362,7 +362,7 @@ onMounted(reload)
     :error="formError || meals.mutationError.value"
     @save="saveMeal"
   />
-  <DailyNutritionDialog
+  <DailyNutritionFormDialog
     v-model="dailyDialogIsOpen"
     :entry="editingDailyTotal"
     :date="calendarDate || ''"

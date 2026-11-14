@@ -4,7 +4,7 @@ import { useWeightLogs } from '@/composables/useWeightLogs.js'
 import { formatMeasuredAt } from '@/utils/measuredAtFormatting.js'
 import { formatWeight } from '@/utils/weightFormatting.js'
 import { useAuthStore } from '@/stores/auth.js'
-import WeightEntryDialog from '@/components/WeightEntryDialog.vue'
+import WeightMeasurementFormDialog from '@/components/WeightMeasurementFormDialog.vue'
 import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
 import WeightHistoryTable from '@/components/WeightHistoryTable.vue'
 
@@ -155,7 +155,7 @@ onMounted(reload)
     />
   </section>
 
-  <WeightEntryDialog
+  <WeightMeasurementFormDialog
     v-model="weightDialogIsOpen"
     :entry="editingWeight"
     :busy="isBusy"
