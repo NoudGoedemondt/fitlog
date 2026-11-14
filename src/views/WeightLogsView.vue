@@ -1,6 +1,6 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue'
-import { useWeightLogs } from '../composables/useWeightLogs.js'
+import { computed, onMounted, ref } from 'vue'
+import { useWeightLogs } from '@/composables/useWeightLogs.js'
 import { formatMeasuredAt } from '@/utils/measuredAtFormatting.js'
 import { formatWeight } from '@/utils/weightFormatting.js'
 import { useAuthStore } from '@/stores/auth.js'
@@ -10,84 +10,61 @@ import WeightHistoryTable from '@/components/WeightHistoryTable.vue'
 
 const authStore = useAuthStore()
 const weightLogs = useWeightLogs()
-const dialogTarget = ref(false) // false | 'new' | <id>
-const dialogIsOpen = ref(false)
-const editingEntry = ref(null)
-const deletingItemId = ref(null)
-const formError = ref(null)
 const isBusy = weightLogs.isMutationLoading
 const latestEntry = computed(() => weightLogs.weightEntries.value[0] ?? null)
-const entryToDelete = computed(
-  () => weightLogs.weightEntries.value.find((entry) => entry.id === deletingItemId.value) ?? null,
-)
-const deleteDialogIsOpen = computed({
-  get: () => deletingItemId.value !== null,
-  set: (value) => {
-    if (!value && !isBusy.value) deletingItemId.value = null
+const weightDialogIsOpen = ref(false)
+const editingWeight = ref(null)
+const deletingWeight = ref(null)
+const formError = ref(null)
+const deleteWeightIsOpen = computed({
+  get: () => deletingWeight.value !== null,
+  set: (open) => {
+    if (!open && !isBusy.value) deletingWeight.value = null
   },
 })
 
-const openDialog = (target, entry = null) => {
-  if (isBusy.value) return
+const clearErrors = () => {
   formError.value = null
   weightLogs.mutationError.value = null
-  editingEntry.value = entry
-  dialogTarget.value = target
-  dialogIsOpen.value = true
 }
 
-const resetTargetAfterLeave = () => {
-  dialogTarget.value = false
-  editingEntry.value = null
-}
-
-const add = () => openDialog('new')
-
-const edit = (id) => {
+const openWeight = (entry = null) => {
   if (isBusy.value) return
-  const found = weightLogs.weightEntries.value.find((entry) => entry.id === id)
-  if (!found) {
-    weightLogs.mutationError.value = 'This weight entry is no longer available. Reload the entries.'
-    return
-  }
-  openDialog(id, found)
+  clearErrors()
+  editingWeight.value = entry
+  weightDialogIsOpen.value = true
 }
 
-const save = async (values) => {
+const confirmDeleteWeight = (entry) => {
   if (isBusy.value) return
-  formError.value = null
-  weightLogs.mutationError.value = null
+  clearErrors()
+  deletingWeight.value = entry
+}
+
+const saveWeight = async (values) => {
+  if (isBusy.value || !weightDialogIsOpen.value) return
+  clearErrors()
   if (!authStore.user) {
     formError.value = 'Please log in again before saving a weight entry.'
     return
   }
-  let success
-  if (dialogTarget.value === 'new') {
-    success = await weightLogs.createWeightEntry({ user_id: authStore.user.id, ...values })
-  } else if (typeof dialogTarget.value === 'number') {
-    success = await weightLogs.updateWeightEntry(dialogTarget.value, values)
-  } else {
-    formError.value = 'Reopen the weight entry before saving.'
-    return
-  }
-  if (success) dialogIsOpen.value = false
+  const success = editingWeight.value
+    ? await weightLogs.updateWeightEntry(editingWeight.value.id, values)
+    : await weightLogs.createWeightEntry({ user_id: authStore.user.id, ...values })
+  if (success) weightDialogIsOpen.value = false
 }
 
-const remove = async (id) => {
+const removeWeight = async (id) => {
+  if (isBusy.value || deletingWeight.value?.id !== id) return
+  if (await weightLogs.deleteWeightEntry(id)) deletingWeight.value = null
+}
+
+const reload = async () => {
   if (isBusy.value) return
-  const success = await weightLogs.deleteWeightEntry(id)
-  if (success) deletingItemId.value = null
-}
-
-const toggleRemove = (id) => {
-  if (isBusy.value) return
-  weightLogs.mutationError.value = null
-  deletingItemId.value = deletingItemId.value === id ? null : id
-}
-
-onMounted(async () => {
   await weightLogs.fetchAllWeights()
-})
+}
+
+onMounted(reload)
 </script>
 
 <template>
@@ -106,7 +83,7 @@ onMounted(async () => {
         rounded="lg"
         elevation="0"
         :disabled="isBusy"
-        @click="add"
+        @click="openWeight()"
         >Add measurement</v-btn
       >
     </header>
@@ -118,11 +95,11 @@ onMounted(async () => {
         variant="text"
         :disabled="isBusy"
         :loading="weightLogs.isFetchLoading.value"
-        @click="weightLogs.fetchAllWeights"
+        @click="reload"
       ></v-btn>
     </v-alert>
     <v-alert
-      v-if="weightLogs.mutationError.value && !dialogIsOpen && !deleteDialogIsOpen"
+      v-if="weightLogs.mutationError.value && !weightDialogIsOpen && !deleteWeightIsOpen"
       type="error"
       variant="tonal"
       class="mb-4"
@@ -172,26 +149,25 @@ onMounted(async () => {
       :loading="weightLogs.isFetchLoading.value"
       :busy="isBusy"
       :fetch-error="weightLogs.fetchError.value"
-      @add="add"
-      @edit="edit"
-      @delete="toggleRemove"
+      @add="openWeight()"
+      @edit="openWeight"
+      @delete="confirmDeleteWeight"
     />
   </section>
 
   <WeightEntryDialog
-    v-model="dialogIsOpen"
-    :entry="editingEntry"
+    v-model="weightDialogIsOpen"
+    :entry="editingWeight"
     :busy="isBusy"
     :error="formError || weightLogs.mutationError.value"
-    @save="save"
-    @after-leave="resetTargetAfterLeave"
+    @save="saveWeight"
   />
   <DeleteWeightDialog
-    v-model="deleteDialogIsOpen"
-    :entry="entryToDelete"
+    v-model="deleteWeightIsOpen"
+    :entry="deletingWeight"
     :busy="isBusy"
     :error="weightLogs.mutationError.value"
-    @confirm="remove"
+    @confirm="removeWeight"
   />
 </template>
 

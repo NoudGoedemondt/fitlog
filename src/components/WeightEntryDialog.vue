@@ -21,7 +21,7 @@ const props = defineProps({
   busy: { type: Boolean, default: false },
   error: { type: String, default: null },
 })
-const emit = defineEmits(['save', 'after-leave'])
+const emit = defineEmits(['save'])
 const createNewEntry = () => {
   const now = new Date()
   return { weight_kg: null, date: now, hour: now.getHours(), minute: now.getMinutes() }
@@ -103,7 +103,6 @@ const submit = async () => {
     :persistent="isBusy"
     max-width="480"
     aria-labelledby="weight-entry-dialog-title"
-    @after-leave="emit('after-leave')"
   >
     <v-card class="entry-dialog" rounded="xl">
       <div class="dialog-heading">

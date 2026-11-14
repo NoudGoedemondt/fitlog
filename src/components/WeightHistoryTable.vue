@@ -58,7 +58,7 @@ const headers = [
             :aria-label="`Edit measurement from ${formatMeasuredAt(item.measured_at)}`"
             title="Edit measurement"
             :disabled="busy"
-            @click="emit('edit', item.id)"
+            @click="emit('edit', item)"
           ></v-btn>
           <v-btn
             class="delete-entry-button"
@@ -69,7 +69,7 @@ const headers = [
             :aria-label="`Delete measurement from ${formatMeasuredAt(item.measured_at)}`"
             title="Delete measurement"
             :disabled="busy"
-            @click="emit('delete', item.id)"
+            @click="emit('delete', item)"
           ></v-btn>
         </div>
       </template>
