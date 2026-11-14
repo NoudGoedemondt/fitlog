@@ -4,7 +4,11 @@ import PageHeading from '@/components/PageHeading.vue'
 import { useAuthStore } from '@/stores/auth.js'
 import { useMeals } from '@/composables/useMeals.js'
 import { useDailyNutritionTotals } from '@/composables/useDailyNutritionTotals.js'
-import { formatMeasuredAt, parseDateInput } from '@/utils/measuredAtFormatting.js'
+import {
+  formatMeasuredAt,
+  formatMeasuredTime,
+  parseDateInput,
+} from '@/utils/measuredAtFormatting.js'
 import { validDate } from '@/utils/validationRules.js'
 import {
   dailyNutritionSummary,
@@ -22,6 +26,12 @@ import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
 
 const mealHeaders = [
   { title: 'Meal', key: 'name', minWidth: '180px' },
+  {
+    title: 'Time',
+    key: 'consumed_at',
+    headerProps: { class: 'd-none d-sm-table-cell' },
+    cellProps: { class: 'd-none d-sm-table-cell' },
+  },
   ...nutritionFields.map((field) => {
     const visibility =
       field.key === 'calories_kcal' ? undefined : { class: 'd-none d-sm-table-cell' }
@@ -230,6 +240,9 @@ onMounted(reload)
       <template #[`item.name`]="{ item }">
         <div class="entry-name">{{ item.name }}</div>
         <p v-if="item.description" class="entry-description">{{ item.description }}</p>
+      </template>
+      <template #[`item.consumed_at`]="{ item }">
+        <span class="row-date">{{ formatMeasuredTime(item.consumed_at) }}</span>
       </template>
       <template v-for="field in nutritionFields" :key="field.key" #[`item.${field.key}`]="{ item }">
         <span class="row-value"
