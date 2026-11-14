@@ -14,10 +14,25 @@ import {
   toCalendarDate,
   formatCalendarDate,
 } from '@/utils/nutrition.js'
+import EntryHistoryTable from '@/components/EntryHistoryTable.vue'
 import DailyNutritionSummary from '@/components/DailyNutritionSummary.vue'
 import MealFormDialog from '@/components/MealFormDialog.vue'
 import DailyNutritionFormDialog from '@/components/DailyNutritionFormDialog.vue'
 import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
+
+const mealHeaders = [
+  { title: 'Meal', key: 'name', minWidth: '180px' },
+  ...nutritionFields.map((field) => {
+    const visibility =
+      field.key === 'calories_kcal' ? undefined : { class: 'd-none d-sm-table-cell' }
+    return {
+      title: `${field.label} (${field.unit})`,
+      key: field.key,
+      headerProps: visibility,
+      cellProps: visibility,
+    }
+  }),
+]
 
 const authStore = useAuthStore()
 const meals = useMeals()
@@ -186,83 +201,42 @@ onMounted(reload)
       @delete="confirmDeleteDaily"
     />
 
-    <section
-      class="registration-card"
-      aria-labelledby="individual-meals-title"
-      :aria-busy="meals.isFetchLoading.value"
+    <EntryHistoryTable
+      title="Individual meals"
+      description="Use the row actions to edit or delete a meal."
+      :headers="mealHeaders"
+      :entries="meals.isFetchLoading.value || meals.fetchError.value ? [] : dayMeals"
+      :loading="meals.isFetchLoading.value"
+      :busy="isBusy || !ready"
+      :fetch-error="meals.fetchError.value"
+      :unavailable-message="calendarDate ? null : 'Select a valid date to view meals.'"
+      :note="
+        summary?.source === 'manual'
+          ? 'These meals are not added to your manual daily total.'
+          : null
+      "
+      show-add-button
+      add-text="Add meal"
+      loading-text="Loading meals…"
+      empty-title="No meals recorded for this date"
+      empty-description="Add a meal to record your nutrition for this date."
+      error-title="Unable to load meals"
+      empty-icon="mdi-silverware-fork-knife"
+      :entry-label="(entry) => entry.name"
+      @add="openMeal()"
+      @edit="openMeal"
+      @delete="confirmDeleteMeal"
     >
-      <div class="section-heading">
-        <div>
-          <h2 id="individual-meals-title">Individual meals</h2>
-          <p>
-            Most recent first · {{ dayMeals.length }} {{ dayMeals.length === 1 ? 'meal' : 'meals' }}
-          </p>
-        </div>
-        <v-btn
-          class="add-entry-button"
-          color="primary"
-          prepend-icon="mdi-plus"
-          size="large"
-          rounded="lg"
-          elevation="0"
-          :disabled="isBusy || !ready"
-          @click="openMeal()"
-          >Add meal</v-btn
+      <template #[`item.name`]="{ item }">
+        <div class="entry-name">{{ item.name }}</div>
+        <p v-if="item.description" class="entry-description">{{ item.description }}</p>
+      </template>
+      <template v-for="field in nutritionFields" :key="field.key" #[`item.${field.key}`]="{ item }">
+        <span class="row-value"
+          >{{ formatNutrition(item[field.key]) }}<span>{{ field.unit }}</span></span
         >
-      </div>
-      <p v-if="summary?.source === 'manual'" class="meal-summary-note">
-        These meals are not added to your manual daily total.
-      </p>
-      <p v-if="meals.isFetchLoading.value">Loading meals…</p>
-      <p v-else-if="meals.fetchError.value">Meals unavailable. Select Try again above.</p>
-      <p v-else-if="!calendarDate">Select a valid date to view meals.</p>
-      <p v-else-if="!dayMeals.length" class="empty-state">No meals recorded for this date.</p>
-      <div v-else class="meal-list">
-        <article v-for="meal in dayMeals" :key="meal.id" class="meal-entry">
-          <div class="section-heading">
-            <div class="meal-details">
-              <h3>{{ meal.name }}</h3>
-              <p v-if="meal.description" class="entry-description">{{ meal.description }}</p>
-              <p class="row-date">
-                <v-icon icon="mdi-calendar-blank-outline" size="17" aria-hidden="true"></v-icon>
-                {{ formatMeasuredAt(meal.consumed_at) }}
-              </p>
-            </div>
-            <div class="row-actions">
-              <v-btn
-                icon="mdi-pencil-outline"
-                variant="text"
-                color="secondary"
-                size="small"
-                :aria-label="`Edit ${meal.name}`"
-                title="Edit meal"
-                :disabled="isBusy || !ready"
-                @click="openMeal(meal)"
-              ></v-btn>
-              <v-btn
-                class="delete-entry-button"
-                icon="mdi-trash-can-outline"
-                variant="text"
-                color="secondary"
-                size="small"
-                :aria-label="`Delete ${meal.name}`"
-                title="Delete meal"
-                :disabled="isBusy || !ready"
-                @click="confirmDeleteMeal(meal)"
-              ></v-btn>
-            </div>
-          </div>
-          <dl class="meal-nutrition">
-            <div v-for="field in nutritionFields" :key="field.key">
-              <dt>{{ field.label }}</dt>
-              <dd>
-                {{ formatNutrition(meal[field.key]) }}<span>{{ field.unit }}</span>
-              </dd>
-            </div>
-          </dl>
-        </article>
-      </div>
-    </section>
+      </template>
+    </EntryHistoryTable>
   </section>
   <MealFormDialog
     v-model="mealDialogIsOpen"
@@ -311,158 +285,39 @@ onMounted(reload)
   max-width: 1060px;
   margin: 28px auto 48px;
 }
-.page-heading,
-.section-heading {
+
+.page-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
   margin-bottom: 24px;
 }
-p,
-dt {
+
+p {
   color: rgb(var(--v-theme-on-surface-variant));
   font-size: 13px;
   line-height: 1.6;
 }
-h2 {
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-}
-h3 {
-  font-size: 17px;
-  font-weight: 600;
-}
+
 .date-selection {
   flex: 0 0 260px;
 }
-.registration-card {
-  padding: 24px 28px;
-  border: 1px solid rgb(var(--v-theme-outline));
-  border-radius: 20px;
-  margin-bottom: 24px;
-  background: rgb(var(--v-theme-surface));
-}
-.meal-nutrition {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-.meal-summary-note {
-  margin-bottom: 16px;
-}
-.row-actions {
-  display: flex;
-  justify-content: flex-end;
-  flex-shrink: 0;
-  color: rgb(var(--v-theme-secondary));
-}
-.row-actions .v-btn {
-  border-radius: 9px;
-}
-.delete-entry-button:hover {
-  color: rgb(var(--v-theme-error)) !important;
-}
-.v-btn {
-  text-transform: none;
-  letter-spacing: 0;
-}
-.add-entry-button {
-  flex-shrink: 0;
-  padding-inline: 22px;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 600;
-}
-.meal-list {
-  margin-inline: -28px;
-  border-bottom: 1px solid rgb(var(--v-theme-outline));
-}
-.meal-entry {
-  border-top: 1px solid rgb(var(--v-theme-outline));
-  padding: 20px 28px;
-}
-.meal-entry .section-heading {
-  margin-bottom: 12px;
-}
-.meal-details {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.meal-details .entry-description {
-  margin: 4px 0 6px;
-}
-.row-date {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-top: 6px;
-  white-space: nowrap;
-  color: rgb(var(--v-theme-on-surface-variant));
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-.row-date .v-icon {
-  color: rgb(var(--v-theme-on-surface-variant));
-}
-.entry-description {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  margin: 12px 0;
-}
-.meal-nutrition dt,
-.meal-nutrition dd > span {
-  color: rgb(var(--v-theme-on-surface-variant));
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0;
-}
-.meal-nutrition dd {
-  white-space: nowrap;
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.meal-nutrition dd > span {
-  margin-left: 5px;
-}
-.empty-state {
-  padding: 20px 0;
-  text-align: center;
-}
+
 @media (max-width: 600px) {
   .meals-page {
     margin-top: 16px;
   }
-  .page-heading,
-  .registration-card > .section-heading {
+
+  .page-heading {
     flex-direction: column;
     align-items: stretch;
     gap: 16px;
   }
+
   .date-selection {
     flex-basis: auto;
     width: 100%;
-  }
-  .registration-card {
-    padding: 20px 16px;
-  }
-  .row-date {
-    font-size: 11px;
-  }
-  .meal-list {
-    margin-inline: -16px;
-  }
-  .meal-entry {
-    padding-inline: 16px;
-  }
-  .meal-nutrition {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .meal-nutrition dd {
-    font-size: 17px;
   }
 }
 </style>

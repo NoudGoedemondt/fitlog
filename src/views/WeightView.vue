@@ -8,7 +8,12 @@ import { useAuthStore } from '@/stores/auth.js'
 import WeightMeasurementFormDialog from '@/components/WeightMeasurementFormDialog.vue'
 import DeleteEntryDialog from '@/components/DeleteEntryDialog.vue'
 import LatestWeightMeasurement from '@/components/LatestWeightMeasurement.vue'
-import WeightHistoryTable from '@/components/WeightHistoryTable.vue'
+import EntryHistoryTable from '@/components/EntryHistoryTable.vue'
+
+const weightHeaders = [
+  { title: 'Weight (kg)', key: 'weight_kg' },
+  { title: 'Measured at', key: 'measured_at' },
+]
 
 const authStore = useAuthStore()
 const weightLogs = useWeightLogs()
@@ -123,7 +128,17 @@ onMounted(reload)
       </div>
     </div>
 
-    <WeightHistoryTable
+    <EntryHistoryTable
+      title="Measurement history"
+      description="Use the row actions to edit or delete a measurement."
+      :headers="weightHeaders"
+      add-text="Add measurement"
+      loading-text="Loading measurements…"
+      empty-title="No measurements recorded"
+      empty-description="Add a measurement to record your weight, date and time."
+      error-title="Unable to load measurements"
+      empty-icon="mdi-scale-bathroom"
+      :entry-label="(entry) => `measurement from ${formatMeasuredAt(entry.measured_at)}`"
       :entries="weightLogs.weightEntries.value"
       :loading="weightLogs.isFetchLoading.value"
       :busy="isBusy"
@@ -131,7 +146,17 @@ onMounted(reload)
       @add="openWeight()"
       @edit="openWeight"
       @delete="confirmDeleteWeight"
-    />
+    >
+      <template #[`item.weight_kg`]="{ item }">
+        <span class="row-value">{{ formatWeight(item.weight_kg) }}<span>kg</span></span>
+      </template>
+      <template #[`item.measured_at`]="{ item }">
+        <span class="row-date">
+          <v-icon icon="mdi-calendar-blank-outline" size="17" aria-hidden="true"></v-icon>
+          {{ formatMeasuredAt(item.measured_at) }}
+        </span>
+      </template>
+    </EntryHistoryTable>
   </section>
 
   <WeightMeasurementFormDialog
